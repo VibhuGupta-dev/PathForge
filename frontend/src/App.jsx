@@ -1,12 +1,8 @@
-import {Auth} from "./components/Auth-page"
+// App.jsx
+import Auth from "./components/Auth-page";
 
 function App() {
-
-  return (
-    <>
-      <Auth></Auth>
-    </>
-  )
+  return <Auth />;
 }
 
-export default App
+export default App;
