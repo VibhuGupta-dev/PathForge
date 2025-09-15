@@ -3,8 +3,8 @@ import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 import {Link} from 'react-router-dom'
 
 function AuthPage() {
-  
-
+  const [email,setEmail]=useState("")
+  const [password,setPassword]=useState("")
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-2">
      <div className="absolute left-1/2 bottom-16 -translate-x-1/2 bg-black rounded-2xl shadow-xl border-2 w-full max-w-md p-5 transition duration-300">

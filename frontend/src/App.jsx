@@ -1,18 +1,25 @@
-  
-import React from "react";
+  import React from "react";
 import Auth from "./components/Auth-page.jsx";
 import Spline from "@splinetool/react-spline";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; 
 import SignUp from "./components/SignUp.jsx";
 import Navbar from "./components/NavBar.jsx";
+import Home from "./components/Home.jsx"
 
 function App() {
   return (
     <Router>
-      <Navbar></Navbar>
+        <Navbar></Navbar>
       <Routes>
         <Route 
-          path="/" 
+        path="/"
+        element={
+          <div>
+            <Home></Home>
+          </div>
+        }/>
+        <Route 
+          path="/SignIn" 
           element={
             <div style={{ display: "flex", height: "100vh" }}>
               {/* Left side: Auth page */}
@@ -32,6 +39,7 @@ function App() {
               <Spline scene="https://prod.spline.design/hLFqIWZUESFhrZ-2/scene.splinecode" />
             </div>
           } />
+        
       </Routes>
     </Router>
   );
