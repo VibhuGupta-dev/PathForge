@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Navbar from "../components/NavBar";
+import { useNavigate } from "react-router-dom";
 
 export default function Landing() {
+  const navigate = useNavigate();
   const blocks = [
-    "Need guidance to be a web developer?",
-    `Great! Start with HTML, CSS, and JavaScript.\nBuild small static pages to understand structure, styling, and interactivity.\nMaster responsive design with Flexbox and Grid.\nConsider Tailwind CSS for fast, utility-based styling.`,
-    "Explore frameworks like React or Vue.",
-    "Master backend with Node.js and Express.",
+    "Need guidance to be a web developer",
+    `Great! Start with HTML, CSS, and JavaScript.\nBuild small static pages to understand structure, styling, and interactivity.\nMaster responsive design with Flexbox and Grid.\nConsider Tailwind CSS for fast, utility-based styling...`,
+    "Want to be a doctor",
+    `NCERT First\nBiology: Learn NCERT line by line, every diagram, every example. 70% of NEET Bio is straight from NCERT.\nChemistry: Focus on NCERT for Inorganic & Physical basics.\nPhysics: NCERT + strong problem-solving practice...`
   ];
 
   const [startIndex, setStartIndex] = useState(0);
@@ -51,8 +54,14 @@ export default function Landing() {
     },
   };
 
+  const handleStarted = () => {
+    navigate("/SignIn");
+  };
+
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-gray-900">
+      <Navbar />
+
       {/* Particle Background */}
       <div className="absolute inset-0 z-0">
         {[...Array(20)].map((_, i) => (
@@ -71,10 +80,10 @@ export default function Landing() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex flex-col md:flex-row items-center justify-center px-6 md:px-16 gap-12">
+      <section className="relative z-10 flex flex-col md:flex-row items-center justify-center px-6 md:px-12 gap-12 py-12 flex-grow">
         {/* Hero Content */}
         <motion.div
-          className="flex-1 space-y-8 text-center md:text-left"
+          className="flex-1 flex flex-col items-center md:items-center text-center space-y-6"
           variants={heroText}
           initial="hidden"
           animate="show"
@@ -99,26 +108,30 @@ export default function Landing() {
           </motion.p>
 
           <motion.p
-            className="text-lg md:text-xl text-gray-300 max-w-lg mx-auto md:mx-0"
+            className="text-lg md:text-xl text-gray-300 max-w-lg"
             variants={heroText}
           >
             YourTutor — your personalized learning companion! Tailored guidance,
-            expert support, and smart resources to turn your interest into mastery.
+            expert support, and smart resources to turn your interest into
+            mastery.
           </motion.p>
 
           <motion.div
-            className="flex justify-center md:justify-start"
+            className="flex justify-center"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white text-lg rounded-xl hover:bg-indigo-700 transition duration-300">
+            <button
+              className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white text-lg rounded-xl hover:bg-indigo-700 transition duration-300"
+              onClick={handleStarted}
+            >
               Get Started <ArrowRight size={20} />
             </button>
           </motion.div>
         </motion.div>
 
         {/* Animated Blocks */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 w-full">
+        <div className="flex-1 flex items-center justify-center w-full">
           <AnimatePresence mode="wait">
             <motion.div
               key={startIndex}
@@ -126,7 +139,7 @@ export default function Landing() {
               initial="hidden"
               animate="show"
               exit="hidden"
-              className="flex flex-col items-center gap-4 w-full"
+              className="flex flex-col items-center gap-4 w-full max-w-md"
             >
               {visibleBlocks.map((block, idx) => (
                 <motion.div
@@ -159,7 +172,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-5 bg-gray-800 bg-opacity-50 text-center text-gray-400 text-sm">
+      <footer className="mt-auto py-4 bg-gray-800 bg-opacity-50 text-center text-gray-400 text-sm">
         © {new Date().getFullYear()} YourTutor. All rights reserved.
       </footer>
 

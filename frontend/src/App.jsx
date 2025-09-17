@@ -1,45 +1,36 @@
   import React from "react";
-import Auth from "./components/Auth-page.jsx";
+import SignIn from "./pages/SignIn.jsx";
 import Spline from "@splinetool/react-spline";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; 
-import SignUp from "./components/SignUp.jsx";
-import Navbar from "./components/NavBar.jsx";
-import Home from "./components/Home.jsx"
+import SignUp from "./pages/SignUp.jsx";
+import Home from "./pages/Home.jsx"
+import OtpVerification from "./components/OTP_verify.jsx";
 
 function App() {
   return (
     <Router>
-        <Navbar></Navbar>
       <Routes>
-        <Route 
-        path="/"
-        element={
+        <Route  path="/"element={
           <div>
             <Home></Home>
           </div>
         }/>
-        <Route 
-          path="/SignIn" 
-          element={
-            <div style={{ display: "flex", height: "100vh" }}>
-              {/* Left side: Auth page */}
-              <Auth />
-
-              {/* Right side: Spline scene */}
-              <Spline scene="https://prod.spline.design/SXjPeI852Lx9FeFV/scene.splinecode" />
+        <Route path="/SignIn" element={
+            <div>
+              <SignIn />
             </div>
           } 
         />
-        <Route path="/SignUp" element={
-            <div style={{ display: "flex", height: "100vh" }}>
-              {/* Left side: Auth page */}
+        <Route path="/SignUp"  element={
+            <div>
               <SignUp />
-
-              {/* Right side: Spline scene */}
-              <Spline scene="https://prod.spline.design/hLFqIWZUESFhrZ-2/scene.splinecode" />
             </div>
           } />
-        
+        <Route path="/verify-otp" element={ 
+          <div>
+            <OtpVerification />
+          </div>
+        } />
       </Routes>
     </Router>
   );
