@@ -36,7 +36,7 @@ export default function Navbar() {
 
   return (
     <motion.nav 
-      className="fixed top-0 w-full bg-gray-900/30 backdrop-blur-lg border-b border-gray-700 px-6 py-4 flex justify-between items-center z-20"
+      className="fixed top-0 w-full bg-gray-900/30 backdrop-blur-lg border-b border-gray-700 px-6 py-4 flex mb-10 justify-between items-center z-20"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}

@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignUp from "./pages/SignUp.jsx";
 import Home from "./pages/Home.jsx"
 import OtpVerification from "./components/OTP_verify.jsx";
+import Form from './pages/Form.jsx'
 
 function App() {
   return (
@@ -31,6 +32,11 @@ function App() {
             <OtpVerification />
           </div>
         } />
+        <Route path="/dashboard" element={
+          <div>
+            <Form></Form>
+          </div>
+        }/>
       </Routes>
     </Router>
   );
