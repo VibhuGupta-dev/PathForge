@@ -29,7 +29,7 @@ export default function SignIn() {
         localStorage.setItem("token", res.data.token);
       }
 
-      navigate("/dashboard"); // Dashboard pe le jao
+      navigate("/assessment"); // Assessment page pe le jao
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Login failed, try again");

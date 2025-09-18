@@ -6,7 +6,7 @@ import generateToken from "../utils/GenerateToken.js";
 // Temporary in-memory OTP store (replace with Redis or DB in production)
 const otpStore = new Map();
 
-// Validation schema for registration
+// Validation schemas
 const registrationSchema = Joi.object({
   Fullname: Joi.string().required().messages({
     "string.empty": "Full name is required",
@@ -20,11 +20,11 @@ const registrationSchema = Joi.object({
     "string.empty": "Password is required",
   }),
   contact: Joi.string().required().messages({
+    // Changed to string to match schema
     "string.empty": "Contact is required",
   }),
 });
 
-// Validation schema for OTP verification
 const otpVerificationSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "string.email": "Please enter a valid email address",
@@ -118,7 +118,7 @@ export const verifyRegistrationOTP = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
     });
 
     return res.status(201).json({
