@@ -4,10 +4,11 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongoConnect.js";
 import authRoutes from "./routes/Authroutes.js";
+import userinterestRoutes from "./routes/carrierAssesmentroutes.js";
 
 dotenv.config();
 
-// Connect to MongoDB
+
 connectDB();
 
 const app = express();
@@ -31,6 +32,9 @@ app.use(
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/userinterest" , userinterestRoutes);
+
+
 
 // Health check endpoint
 app.get("/", (req, res) => {
@@ -48,6 +52,7 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
 
 // 404 handler (Fixed)
 app.use((req, res, next) => {
