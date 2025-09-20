@@ -42,3 +42,21 @@ export const createCareerAssessment = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const checkAssessmentStatus = async (req, res) => {
+  try {
+    const userId = req.user._id; // From authMiddleware
+    console.log("Checking assessment status for user:", userId);
+
+    const assessment = await MentalHealthAssessment.findOne({ userId });
+    const hasCompletedAssessment = !!assessment;
+
+    res.status(200).json({
+      success: true,
+      hasCompletedAssessment,
+    });
+  } catch (error) {
+    console.error("Error in checkAssessmentStatus:", error.message);
+    res.status(500).json({ success: false, message: error.message || "Server error" });
+  }
+};
