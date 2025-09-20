@@ -6,6 +6,9 @@ import SignUp from "./pages/SignUp.jsx";
 import Home from "./pages/Home.jsx"
 import OtpVerification from "./components/OTP_verify.jsx";
 import Form from './pages/Form.jsx'
+import Dashboard from "./pages/Dashboard.jsx";
+import Features from "./pages/FeaturePage.jsx";
+
 
 function App() {
   return (
@@ -32,9 +35,19 @@ function App() {
             <OtpVerification />
           </div>
         } />
-        <Route path="/dashboard" element={
+       <Route path="/form" element={
           <div>
             <Form></Form>
+          </div>
+        }/>
+        <Route path="/dashboard" element={
+          <div>
+            <Dashboard />
+          </div>
+        }/>
+        <Route path="/Features" element={
+          <div>
+            <Features></Features>
           </div>
         }/>
       </Routes>

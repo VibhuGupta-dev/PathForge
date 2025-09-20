@@ -48,7 +48,7 @@ export const checkAssessmentStatus = async (req, res) => {
     const userId = req.user._id; // From authMiddleware
     console.log("Checking assessment status for user:", userId);
 
-    const assessment = await MentalHealthAssessment.findOne({ userId });
+    const assessment = await CareerAssessment.findOne({ userId });
     const hasCompletedAssessment = !!assessment;
 
     res.status(200).json({
