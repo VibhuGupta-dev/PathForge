@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export default function CareerQuiz() {
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -12,36 +12,44 @@ export default function CareerQuiz() {
   const [error, setError] = useState('');
   const [showResults, setShowResults] = useState(false);
 
-  // Fetch questions from backend
+  // Check assessment status on mount
   useEffect(() => {
+    checkAssessmentStatus();
     fetchQuestions();
   }, []);
+
+  const checkAssessmentStatus = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/userinterest/status`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to check assessment status');
+      }
+
+      if (data.hasCompletedAssessment) {
+        navigate('/assessment'); // Redirect to assessment if completed
+      }
+    } catch (err) {
+      console.error('Error checking assessment status:', err.message);
+      setError('Failed to verify assessment status: ' + err.message);
+    }
+  };
 
   const fetchQuestions = async () => {
     setLoading(true);
     setError('');
-    
     try {
-      
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/career/questions`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch questions');
-      }
-      
-      const data = await response.json();
-      console.log('Questions fetched:', data);
-      
-      if (data.success && data.questions) {
-        setQuestions(data.questions);
-      } else {
-        // Fallback to sample data if API fails
-        setQuestions(getSampleQuestions());
-      }
+      setQuestions(getSampleQuestions());
     } catch (err) {
       console.error('Error fetching questions:', err);
       setError('Failed to load questions. Using sample data.');
-      // Use sample data as fallback
       setQuestions(getSampleQuestions());
     } finally {
       setLoading(false);
@@ -184,69 +192,104 @@ export default function CareerQuiz() {
 
   // Handle answer selection
   const handleAnswerSelect = (value) => {
-    setAnswers({
-      ...answers,
-      [currentQuestion]: value
-    });
+    console.log(`Selected answer for question ${currentQuestion + 1}: ${value}`);
+    setAnswers({ ...answers, [currentQuestion]: value });
   };
 
-  // Navigate to next question
- const handleNextOrSubmit = () => {
-  if (currentQuestion < questions.length - 1) {
-    setCurrentQuestion(currentQuestion + 1);
-  } else {
-    handleSubmit();
-  }
-};
-
+  // Navigate to next question or submit
+  const handleNextOrSubmit = () => {
+    if (!answers[currentQuestion]) {
+      setError('Please select an answer before proceeding.');
+      return;
+    }
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+      setError('');
+    } else {
+      handleSubmit();
+    }
+  };
 
   // Navigate to previous question
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
+      setError('');
     }
   };
 
   // Submit quiz
- // Submit quiz
-const handleSubmit = async () => {
-  try {
-    // Map over questions to build correct payload
-    const formattedAnswers = questions.map((question, index) => {
-      const selectedValue = answers[index]; // the value the user selected, e.g., 'a', 'b', etc.
-
-      if (!selectedValue) {
-        // If user didn't select, you can either skip or send null
-        return { questionText: question.question, selectedOption: null };
+  const handleSubmit = async () => {
+    try {
+      if (Object.keys(answers).length !== questions.length) {
+        setError('Please answer all questions before submitting.');
+        console.log('Missing answers:', { answered: Object.keys(answers).length, required: questions.length });
+        return;
       }
 
-      return {
-        questionText: question.question,        // backend requires this field
-        selectedOption: selectedValue           // backend requires the option value, NOT text
+      const profileResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      const profileData = await profileResponse.json();
+      if (!profileResponse.ok) {
+        throw new Error(profileData.message || 'Failed to fetch user profile');
+      }
+
+      const userId = profileData.user.id;
+      console.log('Fetched userId:', userId);
+
+      const formattedAnswers = questions.map((question, index) => {
+        const selectedValue = answers[index];
+        const selectedOption = question.options.find((opt) => opt.value === selectedValue)?.text;
+        if (!selectedOption) {
+          console.warn(`No valid option selected for question ${index + 1}: ${question.question}`);
+          return null;
+        }
+        return {
+          questionText: question.question,
+          selectedOption,
+        };
+      });
+
+      if (formattedAnswers.some((answer) => !answer || !answer.selectedOption)) {
+        setError('Some answers are invalid. Please ensure all questions are answered correctly.');
+        console.log('Invalid formattedAnswers:', formattedAnswers);
+        return;
+      }
+
+      const payload = {
+        userId,
+        starterAnswers: formattedAnswers,
       };
-    });
 
-    const payload = {
-      userId: "68cc5ccde13f08ffeeeadcc8", // replace with actual logged-in user id
-      starterAnswers: formattedAnswers      // array of objects with questionText and selectedOption
-    };
+      console.log('Submitting payload:', JSON.stringify(payload, null, 2));
 
-    console.log("Submitting payload:", payload); // check payload before sending
+     const response = await fetch('http://localhost:3000/api/userinterest/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
 
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/userinterest/submit`,
-      payload,
-      { headers: { "Content-Type": "application/json" } }
-    );
+      console.log('Server response:', response.data);
 
-    console.log("Server response:", response.data);
-    setShowResults(true); // show results on successful submit
-  } catch (err) {
-    console.error("Error submitting quiz:", err.response?.data || err.message);
-    setError("Failed to submit quiz");
-  }
-};
-
+      if (response.status === 200 || response.status === 201) {
+        setShowResults(true);
+      } else {
+        throw new Error(response.data.message || 'Failed to submit quiz');
+      }
+    } catch (err) {
+      console.error('Error submitting quiz:', err.message);
+      setError('Failed to submit quiz: ' + err.message);
+    }
+  };
 
   // Calculate progress
   const progress = ((currentQuestion + 1) / questions.length) * 100;
@@ -291,10 +334,10 @@ const handleSubmit = async () => {
             Thank you for completing the career assessment. Your results are being processed.
           </p>
           <button 
-            onClick={() => window.location.reload()}
+            onClick={() => navigate('/Dashboard')}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
           >
-            Take Quiz Again
+            Go to Dashboard
           </button>
         </div>
       </div>
@@ -509,8 +552,8 @@ const handleSubmit = async () => {
               </div>
 
               <button
-               onClick={handleNextOrSubmit}
-               disabled={currentQuestion < questions.length - 1 && !answers[currentQuestion]}
+                onClick={handleNextOrSubmit}
+                disabled={!answers[currentQuestion]}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors nav-button ${
                   !answers[currentQuestion]
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
