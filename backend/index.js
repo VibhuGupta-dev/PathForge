@@ -1,14 +1,19 @@
+// file: backend/server.js
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongoConnect.js";
+
+// Routes
 import authRoutes from "./routes/Authroutes.js";
 import userinterestRoutes from "./routes/carrierAssesmentroutes.js";
+import communityRoute from "./routes/communityRoute.js";
 
 dotenv.config();
 
-
+// DB connect
 connectDB();
 
 const app = express();
@@ -30,11 +35,15 @@ app.use(
   })
 );
 
+// Static folder for profile images
+app.use("/uploads", express.static("uploads"));
+
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/userinterest" , userinterestRoutes);
+app.use("/api/userinterest", userinterestRoutes);
 
-
+// ✅ Community is public now (no authMiddleware here)
+app.use("/api/community", communityRoute);
 
 // Health check endpoint
 app.get("/", (req, res) => {
@@ -53,8 +62,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-
-// 404 handler (Fixed)
+// 404 handler
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
@@ -68,12 +76,16 @@ app.use((err, req, res, next) => {
 
   if (err.name === "ValidationError") {
     const errors = Object.values(err.errors).map((e) => e.message);
-    return res.status(400).json({ success: false, message: "Validation Error", errors });
+    return res
+      .status(400)
+      .json({ success: false, message: "Validation Error", errors });
   }
 
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue)[0];
-    return res.status(400).json({ success: false, message: `${field} already exists` });
+    return res
+      .status(400)
+      .json({ success: false, message: `${field} already exists` });
   }
 
   if (err.name === "JsonWebTokenError") {
@@ -86,7 +98,10 @@ app.use((err, req, res, next) => {
 
   res.status(err.status || 500).json({
     success: false,
-    message: process.env.NODE_ENV === "production" ? "Something went wrong!" : err.message,
+    message:
+      process.env.NODE_ENV === "production"
+        ? "Something went wrong!"
+        : err.message,
   });
 });
 

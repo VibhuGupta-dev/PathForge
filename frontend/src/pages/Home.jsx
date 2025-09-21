@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Navbar from "../components/NavBar";
 import { useNavigate } from "react-router-dom";
 
 export default function Landing() {
@@ -60,8 +59,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden bg-gray-900">
-      <Navbar />
-
+    
       {/* Particle Background */}
       <div className="absolute inset-0 z-0">
         {[...Array(20)].map((_, i) => (

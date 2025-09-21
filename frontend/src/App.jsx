@@ -1,20 +1,21 @@
-  import React from "react";
+import React from "react";
 import SignIn from "./pages/SignIn.jsx";
-import Spline from "@splinetool/react-spline";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; 
 import SignUp from "./pages/SignUp.jsx";
 import Home from "./pages/Home.jsx"
 import OtpVerification from "./components/OTP_verify.jsx";
-import Form from './pages/Form.jsx'
-import Dashboard from "./pages/Dashboard.jsx";
+import Form from './pages/Form.jsx';
+import Dashboard from "./pages/Dashboard.jsx"; 
 import Features from "./pages/FeaturePage.jsx";
+import CommunityPage from "./pages/Community.jsx";
+import CreateCommunityMember from "./pages/CreatePost.jsx";
 
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route  path="/"element={
+        <Route  path="/" element={
           <div>
             <Home></Home>
           </div>
@@ -50,6 +51,16 @@ function App() {
             <Features></Features>
           </div>
         }/>
+        <Route path="/community" element={
+          <div>
+            <CommunityPage></CommunityPage>
+          </div>
+        }></Route>
+        <Route path="/community/create" element={
+          <div>
+            <CreateCommunityMember></CreateCommunityMember>
+          </div>
+        }></Route>
       </Routes>
     </Router>
   );

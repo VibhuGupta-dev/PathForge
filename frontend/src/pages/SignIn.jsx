@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import Navbar from "../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import FloatingButton from "../components/FloatingButton";
@@ -34,6 +33,7 @@ export default function SignIn() {
 
       if (res.data.success) {
         localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
         if (res.data.user.hasCompletedAssessment) {
           navigate("/assessment");
         } else {
@@ -55,29 +55,108 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-teal-50 via-blue-50 to-gray-100">
-      <Navbar />
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-teal-200/30 via-blue-200/30 to-gray-100/30 opacity-70" />
-        {[...Array(20)].map((_, i) => {
-          const size = Math.random() * 5 + 3;
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+ 
+      {/* Modern Gradient Background */}
+      <div className="fixed inset-0 z-0">
+        {/* Main gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900"></div>
+        
+        {/* Animated overlay gradients */}
+        <div 
+          className="absolute inset-0 opacity-40"
+          style={{
+            background: `
+              radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.25) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(29, 78, 216, 0.15) 0%, transparent 50%)
+            `,
+            animation: 'gradientShift 10s ease-in-out infinite'
+          }}
+        ></div>
+
+        {/* Floating geometric elements */}
+        {[...Array(12)].map((_, i) => {
+          const size = Math.random() * 60 + 40;
           const left = Math.random() * 100;
           const top = Math.random() * 100;
-          const dur = (1 + Math.random() * 1).toFixed(2) + "s";
+          const delay = Math.random() * 5;
+          const duration = Math.random() * 10 + 15;
+          
           return (
-            <div
-              key={`dot-${i}`}
-              className="absolute bg-teal-300 rounded-full opacity-30"
+            <motion.div
+              key={`shape-${i}`}
+              className="absolute rounded-full opacity-10"
               style={{
                 width: `${size}px`,
                 height: `${size}px`,
                 left: `${left}%`,
                 top: `${top}%`,
-                animation: `floatDot ${dur} linear infinite`,
+                background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(29, 78, 216, 0.05))',
+                backdropFilter: 'blur(10px)',
+              }}
+              animate={{
+                y: [0, -20, 0],
+                x: [0, 10, 0],
+                scale: [1, 1.1, 1],
+                rotate: [0, 180, 360]
+              }}
+              transition={{
+                duration: duration,
+                delay: delay,
+                repeat: Infinity,
+                ease: "easeInOut"
               }}
             />
           );
         })}
+
+        {/* Subtle particle system */}
+        {[...Array(30)].map((_, i) => {
+          const size = Math.random() * 4 + 2;
+          const left = Math.random() * 100;
+          const top = Math.random() * 100;
+          const delay = Math.random() * 3;
+          
+          return (
+            <motion.div
+              key={`particle-${i}`}
+              className="absolute rounded-full bg-blue-300 opacity-30"
+              style={{
+                width: `${size}px`,
+                height: `${size}px`,
+                left: `${left}%`,
+                top: `${top}%`,
+              }}
+              animate={{
+                opacity: [0.2, 0.8, 0.2],
+                scale: [1, 1.5, 1],
+              }}
+              transition={{
+                duration: 4,
+                delay: delay,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+          );
+        })}
+
+        {/* Modern mesh overlay */}
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            animation: 'meshFloat 20s linear infinite'
+          }}
+        ></div>
+
+        {/* Bottom glow effect */}
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
       </div>
 
       <section className="relative z-10 flex-grow flex items-center justify-center px-6 md:px-16">
@@ -88,73 +167,131 @@ export default function SignIn() {
           animate="show"
         >
           <motion.h2
-            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-teal-400 to-blue-500 text-transparent bg-clip-text"
-            style={{ fontFamily: "Inter, sans-serif", fontWeight: 700 }}
-            animate={{ rotateY: [0, 5, 0] }}
-            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-300 via-blue-200 to-slate-200 text-transparent bg-clip-text drop-shadow-2xl"
+            style={{ 
+              fontFamily: "Inter, sans-serif", 
+              fontWeight: 700,
+              filter: 'drop-shadow(0 4px 20px rgba(59, 130, 246, 0.3))'
+            }}
+            animate={{ 
+              y: [0, -5, 0]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           >
-            Sign In to HelloMind
+            Sign In to YourTutor
           </motion.h2>
+          
           <motion.p
-            className="text-lg md:text-xl text-gray-600"
+            className="text-lg md:text-xl text-blue-100 drop-shadow-lg"
             style={{ fontFamily: "Inter, sans-serif" }}
             variants={heroText}
           >
             Access your personalized mental wellness journey
           </motion.p>
+          
           <motion.div
-            className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg p-6 border border-teal-200/50"
+            className="bg-slate-800/30 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-blue-400/20 relative overflow-hidden"
             variants={heroText}
+            whileHover={{ 
+              scale: 1.02,
+              boxShadow: "0 25px 50px rgba(59, 130, 246, 0.1)"
+            }}
+            transition={{ duration: 0.3 }}
           >
-            <form className="space-y-4" onSubmit={handleSignIn}>
-              <input
+            {/* Inner glow */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-slate-700/5 rounded-2xl"></div>
+            
+            <form className="space-y-6 relative z-10" onSubmit={handleSignIn}>
+              <motion.input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
-                className="w-full px-4 py-2 bg-white/50 text-gray-800 rounded-lg border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                className="w-full px-6 py-4 bg-slate-700/40 text-blue-100 placeholder-blue-300/70 rounded-xl border border-blue-400/30 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 backdrop-blur-sm transition-all duration-300"
                 required
                 aria-label="Email"
+                whileFocus={{ 
+                  scale: 1.02,
+                  boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.2)"
+                }}
               />
-              <input
+              <motion.input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
-                className="w-full px-4 py-2 bg-white/50 text-gray-800 rounded-lg border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                className="w-full px-6 py-4 bg-slate-700/40 text-blue-100 placeholder-blue-300/70 rounded-xl border border-blue-400/30 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 backdrop-blur-sm transition-all duration-300"
                 required
                 aria-label="Password"
+                whileFocus={{ 
+                  scale: 1.02,
+                  boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.2)"
+                }}
               />
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              <FloatingButton type="submit" disabled={loading}>
-                {loading ? "Signing In..." : "Sign In"} <ArrowRight size={20} />
-              </FloatingButton>
+              {error && (
+                <motion.p 
+                  className="text-red-300 text-sm bg-red-500/20 p-3 rounded-xl backdrop-blur-sm border border-red-400/30"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {error}
+                </motion.p>
+              )}
+              <motion.div 
+                whileHover={{ scale: 1.05 }} 
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.1 }}
+              >
+                <FloatingButton type="submit" disabled={loading}>
+                  {loading ? "Signing In..." : "Sign In"} <ArrowRight size={20} />
+                </FloatingButton>
+              </motion.div>
             </form>
+            
             <motion.p
-              className="text-sm text-gray-500 mt-4"
+              className="text-sm text-blue-200 mt-6 relative z-10"
               style={{ fontFamily: "Inter, sans-serif" }}
               variants={heroText}
             >
               Don't have an account?{" "}
-              <button
+              <motion.button
                 onClick={handleSignUpRedirect}
-                className="text-teal-500 hover:underline focus:outline-none"
+                className="text-blue-300 font-medium hover:text-blue-200 transition-all duration-300 focus:outline-none relative"
                 aria-label="Sign Up"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Sign Up
-              </button>
+                <span className="relative z-10 underline decoration-blue-400/50 underline-offset-2 hover:decoration-blue-300">
+                  Sign Up
+                </span>
+              </motion.button>
             </motion.p>
           </motion.div>
         </motion.div>
       </section>
-      <footer className="mt-auto py-5 bg-teal-900/20 text-center text-gray-500 text-sm">
-        © {new Date().getFullYear()} HelloMind. All rights reserved.
+      
+      <footer className="relative z-10 mt-auto py-6 bg-slate-900/40 backdrop-blur-sm text-center text-blue-200 text-sm">
+        © {new Date().getFullYear()} YourTutor. All rights reserved.
       </footer>
+      
       <style>{`
-        @keyframes floatDot {
-          0% { transform: translateY(0); opacity: 0.3; }
-          50% { transform: translateY(-30px); opacity: 0.5; }
-          100% { transform: translateY(-60px); opacity: 0; }
+        @keyframes gradientShift {
+          0%, 100% {
+            filter: hue-rotate(0deg);
+          }
+          50% {
+            filter: hue-rotate(45deg);
+          }
+        }
+
+        @keyframes meshFloat {
+          0% {
+            transform: translate(0, 0);
+          }
+          100% {
+            transform: translate(50px, 50px);
+          }
         }
       `}</style>
     </div>

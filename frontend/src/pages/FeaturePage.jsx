@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Users, Bot, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../components/NavBar";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -115,6 +116,7 @@ export default function Features() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white relative overflow-hidden font-inter">
+      <Navbar></Navbar>
       <AnimatedBackground />
       <motion.div
         className="container mx-auto px-6 py-16 relative z-10"
