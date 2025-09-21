@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaEye,
-  FaEyeSlash,
-  FaPhone,
-} from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
@@ -39,11 +32,9 @@ export default function SignUp() {
     if (!values.email.trim()) e.email = "Email is required";
     else if (!emailRegex.test(values.email)) e.email = "Enter a valid email";
     if (!values.password) e.password = "Password is required";
-    else if (values.password.length < 6)
-      e.password = "Password must be ≥ 6 chars";
+    else if (values.password.length < 6) e.password = "Password must be ≥ 6 chars";
     if (!values.confirm) e.confirm = "Confirm your password";
-    else if (values.confirm !== values.password)
-      e.confirm = "Passwords do not match";
+    else if (values.confirm !== values.password) e.confirm = "Passwords do not match";
     if (!values.contact) e.contact = "Contact number is required";
     return e;
   }
@@ -75,27 +66,26 @@ export default function SignUp() {
         { withCredentials: true }
       );
 
+      console.log("Signup response:", res.data);
+
       if (res.data.success) {
         navigate("/verify-otp", { state: { email: form.email } });
       } else {
         setErrors({ form: res.data.message || "Signup failed" });
       }
     } catch (err) {
-      setErrors({
-        form: err.response?.data?.message || "Something went wrong",
-      });
+      console.error("Signup error:", err.response || err);
+      setErrors({ form: err.response?.data?.message || "Something went wrong" });
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white">
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-gradient-to-br from-teal-50 via-blue-50 to-gray-100">
       <Navbar />
-
-      {/* Floating dots background */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/30 via-indigo-800/30 to-slate-900/30 opacity-70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-teal-200/30 via-blue-200/30 to-gray-100/30 opacity-70" />
         {[...Array(20)].map((_, i) => {
           const size = Math.random() * 5 + 3;
           const left = Math.random() * 100;
@@ -104,7 +94,7 @@ export default function SignUp() {
           return (
             <div
               key={`dot-${i}`}
-              className="absolute bg-blue-400 rounded-full opacity-30"
+              className="absolute bg-teal-300 rounded-full opacity-30"
               style={{
                 width: `${size}px`,
                 height: `${size}px`,
@@ -117,8 +107,7 @@ export default function SignUp() {
         })}
       </div>
 
-      {/* Main Section */}
-      <section className="relative z-10 flex-grow flex items-center justify-center px-6 md:px-16 pt-24 md:pt-28">
+      <section className="relative z-10 flex-grow flex items-center justify-center px-6 md:px-16">
         <motion.div
           className="space-y-8 text-center w-full max-w-md"
           variants={heroText}
@@ -126,20 +115,18 @@ export default function SignUp() {
           animate="show"
         >
           <motion.h2
-            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 text-transparent bg-clip-text"
+            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-teal-400 to-blue-500 text-transparent bg-clip-text"
             style={{ fontFamily: "Inter, sans-serif", fontWeight: 700 }}
             animate={{ rotateY: [0, 5, 0] }}
             transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
           >
-            Create Your Account
+            Sign Up for YourTutor
           </motion.h2>
-
           <motion.div
-            className="bg-slate-900/70 backdrop-blur-md rounded-2xl shadow-xl p-6 md:p-8 border border-blue-500/30 hover:shadow-2xl transition-shadow"
+            className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg p-6 border border-teal-200/50"
             variants={heroText}
           >
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Full name */}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative">
                 <FaUser className="absolute left-3 top-3 text-gray-400" />
                 <input
@@ -147,15 +134,11 @@ export default function SignUp() {
                   value={form.name}
                   onChange={handleChange}
                   placeholder="Full name"
-                  className="w-full pl-10 pr-3 py-2 rounded-lg border bg-slate-800/60 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full pl-10 pr-3 py-2 rounded-lg border bg-white/50 text-gray-800 outline-none focus:ring-2 focus:ring-teal-400"
                   aria-label="Full name"
                 />
-                {errors.name && (
-                  <p className="text-red-400 text-sm mt-1">{errors.name}</p>
-                )}
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
-
-              {/* Email */}
               <div className="relative">
                 <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
                 <input
@@ -163,31 +146,23 @@ export default function SignUp() {
                   value={form.email}
                   onChange={handleChange}
                   placeholder="Email"
-                  className="w-full pl-10 pr-3 py-2 rounded-lg border bg-slate-800/60 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full pl-10 pr-3 py-2 rounded-lg border bg-white/50 text-gray-800 outline-none focus:ring-2 focus:ring-teal-400"
                   aria-label="Email"
                 />
-                {errors.email && (
-                  <p className="text-red-400 text-sm mt-1">{errors.email}</p>
-                )}
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
-
-              {/* Contact number */}
               <div className="relative">
-                <FaPhone className="absolute left-3 top-3 text-gray-400" />
+                <FaUser className="absolute left-3 top-3 text-gray-400" />
                 <input
                   name="contact"
                   value={form.contact}
                   onChange={handleChange}
                   placeholder="Contact number"
-                  className="w-full pl-10 pr-3 py-2 rounded-lg border bg-slate-800/60 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full pl-10 pr-3 py-2 rounded-lg border bg-white/50 text-gray-800 outline-none focus:ring-2 focus:ring-teal-400"
                   aria-label="Contact number"
                 />
-                {errors.contact && (
-                  <p className="text-red-400 text-sm mt-1">{errors.contact}</p>
-                )}
+                {errors.contact && <p className="text-red-500 text-sm mt-1">{errors.contact}</p>}
               </div>
-
-              {/* Password */}
               <div className="relative">
                 <FaLock className="absolute left-3 top-3 text-gray-400" />
                 <input
@@ -196,7 +171,7 @@ export default function SignUp() {
                   onChange={handleChange}
                   placeholder="Password"
                   type={showPwd ? "text" : "password"}
-                  className="w-full pl-10 pr-10 py-2 rounded-lg border bg-slate-800/60 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full pl-10 pr-10 py-2 rounded-lg border bg-white/50 text-gray-800 outline-none focus:ring-2 focus:ring-teal-400"
                   aria-label="Password"
                 />
                 <button
@@ -207,12 +182,8 @@ export default function SignUp() {
                 >
                   {showPwd ? <FaEyeSlash /> : <FaEye />}
                 </button>
-                {errors.password && (
-                  <p className="text-red-400 text-sm mt-1">{errors.password}</p>
-                )}
+                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
               </div>
-
-              {/* Confirm password */}
               <div className="relative">
                 <FaLock className="absolute left-3 top-3 text-gray-400" />
                 <input
@@ -221,50 +192,32 @@ export default function SignUp() {
                   onChange={handleChange}
                   placeholder="Confirm password"
                   type={showPwd ? "text" : "password"}
-                  className="w-full pl-10 pr-10 py-2 rounded-lg border bg-slate-800/60 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full pl-10 pr-10 py-2 rounded-lg border bg-white/50 text-gray-800 outline-none focus:ring-2 focus:ring-teal-400"
                   aria-label="Confirm password"
                 />
-                {errors.confirm && (
-                  <p className="text-red-400 text-sm mt-1">{errors.confirm}</p>
-                )}
+                {errors.confirm && <p className="text-red-500 text-sm mt-1">{errors.confirm}</p>}
               </div>
-
-              {/* General error */}
-              {errors.form && (
-                <p className="text-red-400 text-sm">{errors.form}</p>
-              )}
-
-              {/* Submit */}
+              {errors.form && <p className="text-red-500 text-sm">{errors.form}</p>}
               <FloatingButton type="submit" disabled={submitting}>
                 {submitting ? "Creating..." : "Sign Up"}
               </FloatingButton>
             </form>
-
-            {/* Switch to Sign In */}
             <motion.p
-              className="text-sm text-gray-400 mt-5 text-center"
+              className="text-sm text-gray-500 mt-4 text-center"
               style={{ fontFamily: "Inter, sans-serif" }}
               variants={heroText}
             >
               Already have an account?{" "}
-              <Link
-                to="/signin"
-                className="text-blue-400 hover:underline"
-                aria-label="Sign In"
-              >
+              <Link to="/signin" className="text-teal-500 hover:underline" aria-label="Sign In">
                 Sign In
               </Link>
             </motion.p>
           </motion.div>
         </motion.div>
       </section>
-
-      {/* Footer */}
-      <footer className="mt-auto py-5 bg-slate-900/50 text-center text-gray-400 text-sm">
-        © {new Date().getFullYear()} HelloMind. All rights reserved.
+      <footer className="mt-auto py-5 bg-teal-900/20 text-center text-gray-500 text-sm">
+        © {new Date().getFullYear()} YourTutor. All rights reserved.
       </footer>
-
-      {/* Floating animation */}
       <style>{`
         @keyframes floatDot {
           0% { transform: translateY(0); opacity: 0.3; }
