@@ -15,7 +15,7 @@ from time import sleep
 app = Flask(__name__)
 
 # Configure CORS to allow requests from frontend
-CORS(app, origins=['http://localhost:5173'], supports_credentials=True)
+CORS(app, origins=['https://pathforge-rkgq.onrender.com'], supports_credentials=True)
 
 # Configure rate limiter
 limiter = Limiter(
@@ -58,11 +58,28 @@ def generate_career_advice(assessment_data=None, user_message=None, user_id=None
     try:
         content = ""
         if user_message:
-            content = f"User message: {user_message}\nProvide personalized career advice with actionable steps, recommended career paths, and a disclaimer to consult a career counselor."
+            content = ( f"Here is a student's query:\n\n"
+        f"{user_message}\n\n"
+        f"Give personalized career advice with clear, actionable steps, "
+        f"possible career paths, and practical recommendations. "
+        f"End with a short disclaimer suggesting they also consult a career counselor."
+            )
         elif assessment_data:
-            content = f"Analyze career interests based on the following student data: {assessment_data}\nProvide a detailed career roadmap with recommended education paths, skills, certifications, job roles, and a disclaimer to consult a career counselor."
+            content = (
+        f"Based on this student's assessment data:\n\n"
+        f"{assessment_data}\n\n"
+        f"Analyze their career interests and provide a detailed career roadmap. "
+        f"Include suggested education paths, in-demand skills, useful certifications, "
+        f"potential job roles, and practical steps they can follow. "
+        f"End with a disclaimer suggesting they also consult a career counselor."
+    )
         else:
-            content = "Generate a general career roadmap for a student with common education paths, skills, certifications, job roles, and a disclaimer to consult a career counselor."
+           content = (
+        f"Generate a general career roadmap for students. "
+        f"Include common education paths, essential skills, valuable certifications, "
+        f"and possible job roles. "
+        f"End with a disclaimer suggesting they also consult a career counselor."
+    )
 
         model = genai.GenerativeModel("gemini-1.5-flash")
         max_retries = 3
