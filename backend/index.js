@@ -21,11 +21,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000", "http://localhost:3001" , "https://pathforge-rkgq.onrender.com" , "https://pathforge-server2.onrender.com" , "https://pathforge-agentservice.onrender.com" , "https://path-forge-dt2f.vercel.app" , "https://path-forge-dt2f-ffc598gz5-vibhugupta-devs-projects.vercel.app" , "https://path-forge-dt2f-j90l4rmf8-vibhugupta-devs-projects.vercel.app"]
+    origin: process.env.FRONTEND_URL, // only one allowed
     credentials: true,
     optionsSuccessStatus: 200,
   })
 );
+
 
 app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoutes);
