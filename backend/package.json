@@ -16,6 +16,7 @@
     "@emailjs/nodejs": "^5.0.2",
     "@langchain/google-genai": "^0.2.18",
     "@langchain/langgraph": "^0.4.9",
+    "@sendgrid/mail": "^8.1.6",
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",

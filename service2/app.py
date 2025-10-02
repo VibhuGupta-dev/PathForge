@@ -15,7 +15,7 @@ from time import sleep
 app = Flask(__name__)
 
 # Configure CORS to allow requests from frontend
-CORS(app, origins=['https://pathforge-rkgq.onrender.com'], supports_credentials=True)
+CORS(app, origins=['http://localhost:5173'], supports_credentials=True)
 
 # Configure rate limiter
 limiter = Limiter(
@@ -246,4 +246,4 @@ def get_analyses():
 
 if __name__ == '__main__':
     print("🚀 Starting Career Advisor AI on port 5002...")
-    app.run(host='0.0.0.0', port=5002, debug=True)
+    app.run(host='0.0.0.0', port=5003, debug=True)

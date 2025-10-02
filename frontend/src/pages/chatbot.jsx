@@ -104,7 +104,7 @@ export default function ChatbotPage() {
 
   const checkBackendStatus = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URLL}/health`, { timeout: 5000 });
+      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/health`, { timeout: 5000 });
       setBackendStatus(response.status === 200 ? "online" : "offline");
       return response.status === 200;
     } catch (err) {
@@ -127,7 +127,7 @@ export default function ChatbotPage() {
   const fetchHistory = async () => {
     if (!user) return;
     try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URLL}/api/analyses?userId=${user.id}`, { withCredentials: true });
+      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/api/analyses?userId=${user.id}`, { withCredentials: true });
       if (response.data.success) {
         setHistory(response.data.data);
       }
@@ -140,7 +140,7 @@ export default function ChatbotPage() {
     if (!user || backendStatus !== "online") return;
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URLL}/api/ai-report?userId=${user.id}`, { withCredentials: true });
+      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/api/ai-report?userId=${user.id}`, { withCredentials: true });
       const result = response.data;
       const botMessage = {
         sender: "AI",
@@ -171,7 +171,7 @@ export default function ChatbotPage() {
       if (!online) throw new Error("Server is offline. Please try again later.");
 
       const response = await axios.post(
-        `${import.meta.env.VITE_AI_BACKEND_URLL}/api/ai-chat`,
+        `${import.meta.env.VITE_AI_BACKEND_URL}/api/ai-chat`,
         { message: input, userId: user.id },
         { withCredentials: true }
       );
