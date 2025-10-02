@@ -15,7 +15,7 @@ from time import sleep
 app = Flask(__name__)
 
 # Configure CORS to allow requests from frontend
-CORS(app, origins=["http://localhost:5173", "http://localhost:3000", "https://pathforge-rkgq.onrender.com" , "https://pathforge-backend-3gka.onrender.com"], supports_credentials=True)
+CORS(app, origins=["http://localhost:5173","https://path-forge-dt2f.vercel.app", "http://localhost:3000", "https://pathforge-rkgq.onrender.com" , "https://pathforge-backend-3gka.onrender.com"], supports_credentials=True)
 
 # Configure rate limiter
 limiter = Limiter(
