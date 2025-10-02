@@ -45,18 +45,38 @@ export const createCareerAssessment = async (req, res) => {
 
 export const checkAssessmentStatus = async (req, res) => {
   try {
-    const userId = req.user._id; // From authMiddleware
-    console.log("Checking assessment status for user:", userId);
+    const { userId } = req.query;
+    console.log(`Checking assessment status for userId: ${userId}`);
+
+    if (!userId.match(/^[0-9a-fA-F]{24}$/)) {
+      console.error('Invalid user ID format:', userId);
+      return res.status(400).json({ success: false, message: "Invalid user ID format" });
+    }
 
     const assessment = await CareerAssessment.findOne({ userId });
-    const hasCompletedAssessment = !!assessment;
+    console.log(`Assessment found for userId: ${userId}`, assessment);
 
-    res.status(200).json({
+    if (!assessment) {
+      console.log(`No assessment found for userId: ${userId}`);
+      return res.status(200).json({
+        success: true,
+        hasCompletedAssessment: false,
+        data: { starterAnswers: [] },
+        mentalHealthAnswers: [],
+        message: "No assessment found",
+      });
+    }
+
+    const starterAnswers = assessment.starterAnswers || [];
+    return res.status(200).json({
       success: true,
-      hasCompletedAssessment,
+      hasCompletedAssessment: starterAnswers.length > 0,
+      data: { starterAnswers },
+      mentalHealthAnswers: starterAnswers, // For backward compatibility
+      message: starterAnswers.length > 0 ? "Assessment found" : "No assessment answers found",
     });
   } catch (error) {
-    console.error("Error in checkAssessmentStatus:", error.message);
-    res.status(500).json({ success: false, message: error.message || "Server error" });
+    console.error("Error checking assessment status:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

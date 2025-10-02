@@ -9,7 +9,8 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Features from "./pages/FeaturePage.jsx";
 import CommunityPage from "./pages/Community.jsx";
 import CreateCommunityMember from "./pages/CreatePost.jsx";
-
+import Chatbot from "./pages/chatbot.jsx";
+import YoutubeVideo from "./pages/30days.jsx";
 
 function App() {
   return (
@@ -18,6 +19,11 @@ function App() {
         <Route  path="/" element={
           <div>
             <Home></Home>
+          </div>
+        }/>
+        <Route  path="/chatbot" element={
+          <div>
+            <Chatbot></Chatbot>
           </div>
         }/>
         <Route path="/SignIn" element={
@@ -59,6 +65,11 @@ function App() {
         <Route path="/community/create" element={
           <div>
             <CreateCommunityMember></CreateCommunityMember>
+          </div>
+        }></Route>
+        <Route path="/30days" element={
+          <div>
+            <YoutubeVideo />
           </div>
         }></Route>
       </Routes>

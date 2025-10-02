@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
 
-const userCareerAssessmentSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+const careerAssessmentSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
   starterAnswers: [
     {
-      questionText: { type: String, required: true },
-      selectedOption: { type: String, required: true },
+      questionText: String,
+      selectedOption: String,
+      _id: mongoose.Schema.Types.ObjectId,
     },
   ],
   createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model("CareerAssessment", userCareerAssessmentSchema);
+export default mongoose.model("CareerAssessment", careerAssessmentSchema);

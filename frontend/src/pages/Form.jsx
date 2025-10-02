@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 export default function CareerQuiz() {
   const navigate = useNavigate();
@@ -11,8 +10,8 @@ export default function CareerQuiz() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
 
-  // Check assessment status on mount
   useEffect(() => {
     checkAssessmentStatus();
     fetchQuestions();
@@ -22,23 +21,18 @@ export default function CareerQuiz() {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/userinterest/status`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to check assessment status');
-      }
+      if (!response.ok) throw new Error(data.message || 'Failed to check assessment status');
 
       if (data.hasCompletedAssessment) {
-        navigate('/assessment'); // Redirect to assessment if completed
+        navigate('/Dashboard');
       }
     } catch (err) {
       console.error('Error checking assessment status:', err.message);
-      setError('Failed to verify assessment status: ' + err.message);
     }
   };
 
@@ -49,154 +43,137 @@ export default function CareerQuiz() {
       setQuestions(getSampleQuestions());
     } catch (err) {
       console.error('Error fetching questions:', err);
-      setError('Failed to load questions. Using sample data.');
+      setError('Failed to load questions.');
       setQuestions(getSampleQuestions());
     } finally {
       setLoading(false);
     }
   };
 
-  // Sample questions (fallback) - All 10 questions
   const getSampleQuestions = () => [
     {
       id: 1,
-      question: "Which subject do you enjoy the most?",
+      question: "What is your current educational qualification?",
       options: [
-        { value: "a", text: "Computers & Technology" },
-        { value: "b", text: "Business & Finance" },
-        { value: "c", text: "Sports & Fitness" },
-        { value: "d", text: "Art & Design" },
-        { value: "e", text: "Science & Research" },
-        { value: "f", text: "Helping People" },
-        { value: "g", text: "Media & Entertainment" },
+        { value: "a", text: "8th grade or below" },
+        { value: "b", text: "10th grade (Secondary)" },
+        { value: "c", text: "12th grade (Senior Secondary)" },
+        { value: "d", text: "Diploma/ITI" },
+        { value: "e", text: "Graduate (Bachelor's degree)" },
+        { value: "f", text: "Postgraduate or higher" },
       ],
     },
     {
       id: 2,
-      question: "What kind of work environment do you prefer?",
+      question: "Do you have any prior vocational training or work experience?",
       options: [
-        { value: "a", text: "Quiet and focused (working alone)" },
-        { value: "b", text: "Leading and managing a team" },
-        { value: "c", text: "Active and energetic (outdoors/field)" },
-        { value: "d", text: "Creative and free-flowing" },
-        { value: "e", text: "Research-oriented (labs, data)" },
-        { value: "f", text: "People-focused (helping, teaching)" },
-        { value: "g", text: "Collaborative and expressive" },
+        { value: "a", text: "No experience at all" },
+        { value: "b", text: "Informal training (family trade, apprenticeship)" },
+        { value: "c", text: "Completed ITI/Diploma course" },
+        { value: "d", text: "1-2 years work experience" },
+        { value: "e", text: "3-5 years work experience" },
+        { value: "f", text: "More than 5 years experience" },
       ],
     },
     {
       id: 3,
-      question: "What motivates you the most in your career?",
+      question: "Which industry sector interests you the most?",
       options: [
-        { value: "a", text: "Solving technical problems" },
-        { value: "b", text: "Building successful businesses" },
-        { value: "c", text: "Winning and achieving high performance" },
-        { value: "d", text: "Creating something artistic" },
-        { value: "e", text: "Discovering new knowledge" },
-        { value: "f", text: "Making people's lives better" },
-        { value: "g", text: "Entertaining and inspiring others" },
+        { value: "a", text: "Information Technology (IT/Software)" },
+        { value: "b", text: "Manufacturing & Engineering" },
+        { value: "c", text: "Healthcare & Life Sciences" },
+        { value: "d", text: "Retail & E-commerce" },
+        { value: "e", text: "Agriculture & Allied" },
+        { value: "f", text: "Construction & Infrastructure" },
+        { value: "g", text: "Tourism & Hospitality" },
+        { value: "h", text: "Financial Services & Banking" },
       ],
     },
     {
       id: 4,
-      question: "How do you prefer to learn new things?",
+      question: "What is your preferred mode of learning?",
       options: [
-        { value: "a", text: "Hands-on experiments and projects" },
-        { value: "b", text: "Real-world business experiences" },
-        { value: "c", text: "Practice and training with mentors" },
-        { value: "d", text: "Creative exploration and trial-and-error" },
-        { value: "e", text: "Structured study and research" },
-        { value: "f", text: "Workshops and real-life interactions" },
-        { value: "g", text: "Feedback and collaboration" },
+        { value: "a", text: "Classroom-based traditional training" },
+        { value: "b", text: "Online/digital learning (self-paced)" },
+        { value: "c", text: "Blended (mix of online and offline)" },
+        { value: "d", text: "On-the-job training with mentorship" },
+        { value: "e", text: "Short-term workshops and boot camps" },
       ],
     },
     {
       id: 5,
-      question: "What kind of problems do you enjoy solving the most?",
+      question: "How much time can you dedicate to skill training?",
       options: [
-        { value: "a", text: "Technical glitches and coding challenges" },
-        { value: "b", text: "Strategic and financial planning" },
-        { value: "c", text: "Team coordination and performance" },
-        { value: "d", text: "Design and creative challenges" },
-        { value: "e", text: "Research and analysis problems" },
-        { value: "f", text: "Social or community-related issues" },
-        { value: "g", text: "Communication and media challenges" },
+        { value: "a", text: "3-6 months full-time" },
+        { value: "b", text: "6-12 months full-time" },
+        { value: "c", text: "Part-time (weekends/evenings) for 6-12 months" },
+        { value: "d", text: "Short-term (1-3 months) intensive" },
+        { value: "e", text: "Long-term (1-2 years) with certification" },
       ],
     },
     {
       id: 6,
-      question: "Which activity do you find most rewarding?",
+      question: "What is your primary career goal?",
       options: [
-        { value: "a", text: "Building software or apps" },
-        { value: "b", text: "Managing budgets or investments" },
-        { value: "c", text: "Coaching or training others" },
-        { value: "d", text: "Creating visual or performing arts" },
-        { value: "e", text: "Conducting experiments or studies" },
-        { value: "f", text: "Supporting community welfare" },
-        { value: "g", text: "Producing media content" },
+        { value: "a", text: "Get my first job quickly" },
+        { value: "b", text: "Switch to a better-paying career" },
+        { value: "c", text: "Start my own business/self-employment" },
+        { value: "d", text: "Upgrade skills in current job" },
+        { value: "e", text: "Prepare for future technologies/Industry 4.0" },
+        { value: "f", text: "Gain internationally recognized certification" },
       ],
     },
     {
       id: 7,
-      question: "What role do you naturally take in a team?",
+      question: "Which NSQF skill level aligns with your current abilities?",
       options: [
-        { value: "a", text: "The tech problem-solver" },
-        { value: "b", text: "The strategic leader" },
-        { value: "c", text: "The motivator or team energizer" },
-        { value: "d", text: "The creative idea generator" },
-        { value: "e", text: "The data-driven analyst" },
-        { value: "f", text: "The empathetic supporter" },
-        { value: "g", text: "The communicator or storyteller" },
+        { value: "a", text: "Level 1-2: Basic/foundational skills" },
+        { value: "b", text: "Level 3-4: Intermediate technical skills" },
+        { value: "c", text: "Level 5-6: Advanced/specialized skills" },
+        { value: "d", text: "Level 7-8: Supervisory/management skills" },
+        { value: "e", text: "Not sure - need guidance" },
       ],
     },
     {
       id: 8,
-      question: "What type of project excites you the most?",
+      question: "What type of job role do you aspire for?",
       options: [
-        { value: "a", text: "Developing new technology" },
-        { value: "b", text: "Launching a business venture" },
-        { value: "c", text: "Organizing a sports event" },
-        { value: "d", text: "Designing a creative campaign" },
-        { value: "e", text: "Conducting scientific research" },
-        { value: "f", text: "Improving community services" },
-        { value: "g", text: "Producing a film or show" },
+        { value: "a", text: "Technical/hands-on operational role" },
+        { value: "b", text: "Supervisory/team leadership role" },
+        { value: "c", text: "Project management/strategic role" },
+        { value: "d", text: "Freelancing/consulting role" },
+        { value: "e", text: "Entrepreneurship/business owner" },
       ],
     },
     {
       id: 9,
-      question: "What skill do you most want to develop?",
+      question: "Are you comfortable with emerging technologies (AI, IoT, Automation)?",
       options: [
-        { value: "a", text: "Coding or software development" },
-        { value: "b", text: "Financial analysis or management" },
-        { value: "c", text: "Physical training or coaching" },
-        { value: "d", text: "Artistic or design skills" },
-        { value: "e", text: "Research or data analysis" },
-        { value: "f", text: "Counseling or social work" },
-        { value: "g", text: "Media production or journalism" },
+        { value: "a", text: "Not at all - prefer traditional skills" },
+        { value: "b", text: "Basic awareness, willing to learn" },
+        { value: "c", text: "Moderate understanding, need formal training" },
+        { value: "d", text: "Good understanding, want advanced training" },
+        { value: "e", text: "Expert level, looking for specialization" },
       ],
     },
     {
       id: 10,
-      question: "What impact do you want your career to have?",
+      question: "What is your preferred work location/mobility?",
       options: [
-        { value: "a", text: "Advancing technology" },
-        { value: "b", text: "Growing economic opportunities" },
-        { value: "c", text: "Promoting health and fitness" },
-        { value: "d", text: "Enriching cultural experiences" },
-        { value: "e", text: "Expanding scientific knowledge" },
-        { value: "f", text: "Improving social welfare" },
-        { value: "g", text: "Inspiring through media" },
+        { value: "a", text: "Local area only (within 50km)" },
+        { value: "b", text: "Within my state" },
+        { value: "c", text: "Anywhere in India" },
+        { value: "d", text: "International opportunities" },
+        { value: "e", text: "Remote/work-from-home only" },
       ],
     },
   ];
 
-  // Handle answer selection
   const handleAnswerSelect = (value) => {
-    console.log(`Selected answer for question ${currentQuestion + 1}: ${value}`);
     setAnswers({ ...answers, [currentQuestion]: value });
+    setError('');
   };
 
-  // Navigate to next question or submit
   const handleNextOrSubmit = () => {
     if (!answers[currentQuestion]) {
       setError('Please select an answer before proceeding.');
@@ -210,7 +187,6 @@ export default function CareerQuiz() {
     }
   };
 
-  // Navigate to previous question
   const handlePrevious = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
@@ -218,80 +194,58 @@ export default function CareerQuiz() {
     }
   };
 
-  // Submit quiz
   const handleSubmit = async () => {
     try {
       if (Object.keys(answers).length !== questions.length) {
         setError('Please answer all questions before submitting.');
-        console.log('Missing answers:', { answered: Object.keys(answers).length, required: questions.length });
         return;
       }
 
       const profileResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
 
       const profileData = await profileResponse.json();
-      if (!profileResponse.ok) {
-        throw new Error(profileData.message || 'Failed to fetch user profile');
-      }
+      if (!profileResponse.ok) throw new Error(profileData.message || 'Failed to fetch user profile');
 
       const userId = profileData.user.id;
-      console.log('Fetched userId:', userId);
 
       const formattedAnswers = questions.map((question, index) => {
         const selectedValue = answers[index];
         const selectedOption = question.options.find((opt) => opt.value === selectedValue)?.text;
-        if (!selectedOption) {
-          console.warn(`No valid option selected for question ${index + 1}: ${question.question}`);
-          return null;
-        }
-        return {
-          questionText: question.question,
-          selectedOption,
-        };
+        if (!selectedOption) return null;
+        return { questionText: question.question, selectedOption };
       });
 
-      if (formattedAnswers.some((answer) => !answer || !answer.selectedOption)) {
-        setError('Some answers are invalid. Please ensure all questions are answered correctly.');
-        console.log('Invalid formattedAnswers:', formattedAnswers);
+      if (formattedAnswers.some((answer) => !answer)) {
+        setError('Some answers are invalid. Please ensure all questions are answered.');
         return;
       }
 
-      const payload = {
-        userId,
-        starterAnswers: formattedAnswers,
-      };
+      const payload = { userId, starterAnswers: formattedAnswers };
 
-      console.log('Submitting payload:', JSON.stringify(payload, null, 2));
-
-     const response = await fetch('http://localhost:3000/api/userinterest/submit', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/userinterest/submit`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(payload),
       });
 
-      console.log('Server response:', response.data);
+      const data = await response.json();
 
-      if (response.status === 200 || response.status === 201) {
+      if (response.ok) {
         setShowResults(true);
       } else {
-        throw new Error(response.data.message || 'Failed to submit quiz');
+        throw new Error(data.message || 'Failed to submit assessment');
       }
     } catch (err) {
-      console.error('Error submitting quiz:', err.message);
-      setError('Failed to submit quiz: ' + err.message);
+      console.error('Error submitting quiz:', err);
+      setError('Failed to submit assessment: ' + err.message);
     }
   };
 
-  // Calculate progress
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const answeredCount = Object.keys(answers).length;
 
@@ -300,25 +254,7 @@ export default function CareerQuiz() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-xl">Loading Career Quiz...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="bg-red-500/20 border border-red-500 rounded-lg p-6 max-w-md">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-red-400 text-xl font-bold text-center mb-2">Error Loading Quiz</h2>
-          <p className="text-red-400 text-center mb-4">{error}</p>
-          <button 
-            onClick={fetchQuestions}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors"
-          >
-            Try Again
-          </button>
+          <p className="text-white text-xl">Loading Career Assessment...</p>
         </div>
       </div>
     );
@@ -329,9 +265,9 @@ export default function CareerQuiz() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-6">
         <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 max-w-md w-full border border-gray-600">
           <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white text-center mb-4">Quiz Completed!</h2>
+          <h2 className="text-2xl font-bold text-white text-center mb-4">Assessment Completed!</h2>
           <p className="text-gray-300 text-center mb-6">
-            Thank you for completing the career assessment. Your results are being processed.
+            Your responses have been saved. We will now generate a personalized NSQF-aligned training roadmap for you.
           </p>
           <button 
             onClick={() => navigate('/Dashboard')}
@@ -344,179 +280,90 @@ export default function CareerQuiz() {
     );
   }
 
+  if (showIntro) {
+    return (
+      <div className="min-h-screen bg-gray-900 relative overflow-hidden flex items-center justify-center p-6">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-gray-900 opacity-90"></div>
+        <div className="relative z-10 max-w-3xl w-full">
+          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 border border-gray-600">
+            <div className="flex items-center justify-center mb-6">
+              <Info className="w-12 h-12 text-indigo-400" />
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">NCVET Career Assessment</h2>
+            <p className="text-gray-300 mb-6 text-center">
+              This assessment is designed to understand your educational background, skills, career aspirations, 
+              and learning preferences to recommend personalized vocational training pathways.
+            </p>
+            <div className="bg-indigo-900/30 rounded-lg p-6 mb-6">
+              <h3 className="text-xl font-semibold text-white mb-3">This assessment aligns with:</h3>
+              <ul className="list-disc list-inside text-gray-300 space-y-2">
+                <li>National Skills Qualifications Framework (NSQF)</li>
+                <li>Current industry demands and future skill requirements</li>
+                <li>Your socio-economic context and learning pace</li>
+                <li>Stackable credentials and lifelong learning opportunities</li>
+              </ul>
+            </div>
+            <p className="text-gray-400 text-sm italic text-center mb-6">
+              Answer honestly for the most accurate personalized training recommendations. This assessment takes approximately 5-10 minutes.
+            </p>
+            <button
+              onClick={() => setShowIntro(false)}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors"
+            >
+              Start Assessment
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const currentQ = questions[currentQuestion];
 
   return (
     <div className="min-h-screen bg-gray-900 relative overflow-hidden">
-      {/* Enhanced Background Animation */}
-      <div className="absolute inset-0 z-0">
-        {/* Main gradient background with animation */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-gray-900 opacity-90 gradientShift"></div>
-        
-        {/* Secondary animated gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-tl from-cyan-500/10 via-blue-600/20 to-purple-700/30 animate-pulse"></div>
-        
-        {/* Floating geometric shapes */}
-        {[...Array(12)].map((_, i) => {
-          const size = Math.random() * 30 + 20;
-          const left = Math.random() * 100;
-          const top = Math.random() * 100;
-          const duration = Math.random() * 20 + 15;
-          const delay = Math.random() * 10;
-          return (
-            <div
-              key={`shape-${i}`}
-              className="absolute opacity-20 floatingShape"
-              style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                left: `${left}%`,
-                top: `${top}%`,
-                animation: `floatComplex ${duration}s ease-in-out infinite ${delay}s`,
-                background: i % 4 === 0 
-                  ? 'linear-gradient(45deg, #3B82F6, #8B5CF6)' 
-                  : i % 4 === 1 
-                  ? 'linear-gradient(135deg, #06B6D4, #3B82F6)'
-                  : i % 4 === 2
-                  ? 'linear-gradient(225deg, #8B5CF6, #EC4899)'
-                  : 'linear-gradient(315deg, #10B981, #06B6D4)',
-                borderRadius: i % 3 === 0 ? '50%' : i % 3 === 1 ? '20%' : '0%',
-                clipPath: i % 4 === 3 ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none',
-              }}
-            />
-          );
-        })}
-        
-        {/* Small animated particles */}
-        {[...Array(40)].map((_, i) => {
-          const size = Math.random() * 8 + 3;
-          const left = Math.random() * 100;
-          const top = Math.random() * 100;
-          const animationDelay = Math.random() * 5;
-          const duration = Math.random() * 8 + 4;
-          return (
-            <div
-              key={`particle-${i}`}
-              className={`absolute rounded-full sparkle ${
-                i % 5 === 0 ? 'bg-cyan-400' :
-                i % 5 === 1 ? 'bg-blue-400' :
-                i % 5 === 2 ? 'bg-purple-400' : 
-                i % 5 === 3 ? 'bg-pink-400' : 'bg-green-400'
-              }`}
-              style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                left: `${left}%`,
-                top: `${top}%`,
-                animation: `sparkle ${duration}s ease-in-out infinite ${animationDelay}s`,
-                filter: 'blur(0.5px)',
-              }}
-            />
-          );
-        })}
-        
-        {/* Animated wave effects */}
-        {[...Array(3)].map((_, i) => (
-          <div
-            key={`wave-${i}`}
-            className="absolute inset-0 opacity-10 waveAnimation"
-            style={{
-              background: `radial-gradient(ellipse at ${30 + i * 20}% ${20 + i * 30}%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)`,
-              animation: `wave ${8 + i * 2}s ease-in-out infinite ${i * 2}s`,
-            }}
-          />
-        ))}
-        
-        {/* Moving light streaks */}
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={`streak-${i}`}
-            className="absolute lightStreak"
-            style={{
-              width: '2px',
-              height: '100px',
-              background: 'linear-gradient(to bottom, transparent, rgba(139, 92, 246, 0.6), transparent)',
-              left: `${Math.random() * 100}%`,
-              top: '-100px',
-              animation: `streak ${3 + Math.random() * 4}s linear infinite ${Math.random() * 5}s`,
-            }}
-          />
-        ))}
-        
-        {/* Pulsing orbs */}
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={`orb-${i}`}
-            className="absolute pulsingOrb"
-            style={{
-              width: `${40 + Math.random() * 60}px`,
-              height: `${40 + Math.random() * 60}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: `radial-gradient(circle, ${
-                i % 3 === 0 ? 'rgba(59, 130, 246, 0.3)' :
-                i % 3 === 1 ? 'rgba(139, 92, 246, 0.3)' : 'rgba(6, 182, 212, 0.3)'
-              }, transparent 70%)`,
-              borderRadius: '50%',
-              animation: `pulse ${2 + Math.random() * 3}s ease-in-out infinite ${Math.random() * 2}s`,
-            }}
-          />
-        ))}
-        
-        {/* Rotating rings */}
-        {[...Array(4)].map((_, i) => (
-          <div
-            key={`ring-${i}`}
-            className="absolute rotatingRing"
-            style={{
-              width: `${80 + i * 40}px`,
-              height: `${80 + i * 40}px`,
-              left: `${20 + i * 15}%`,
-              top: `${30 + i * 10}%`,
-              border: '1px solid rgba(139, 92, 246, 0.2)',
-              borderRadius: '50%',
-              animation: `rotate ${10 + i * 5}s linear infinite`,
-            }}
-          />
-        ))}
-      </div>
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-800 to-gray-900 opacity-90"></div>
 
-      {/* Header */}
       <div className="relative z-10 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-white">Career Assessment</h1>
+            <h1 className="text-2xl font-bold text-white">NCVET Career Assessment</h1>
             <div className="text-sm text-gray-300">
               Question {currentQuestion + 1} of {questions.length}
             </div>
           </div>
           
-          {/* Progress Bar */}
           <div className="w-full bg-gray-700 rounded-full h-2 mb-8">
             <div 
-              className="progress-bar h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
         </div>
       </div>
 
-      {/* Question Section */}
       <div className="relative z-10 flex-grow flex items-center justify-center p-6">
         <div className="max-w-2xl w-full">
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 border border-gray-600 quiz-card">
+          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 border border-gray-600">
             <h2 className="text-2xl font-bold text-white mb-8 text-center">
               {currentQ?.question}
             </h2>
 
+            {error && (
+              <div className="flex items-center gap-2 bg-red-500/20 border border-red-500 rounded-lg p-3 mb-6 text-red-400">
+                <AlertCircle size={20} />
+                <span>{error}</span>
+              </div>
+            )}
+
             <div className="space-y-4 mb-8">
-              {currentQ?.options?.map((option, index) => (
+              {currentQ?.options?.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => handleAnswerSelect(option.value)}
-                  className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-300 quiz-option ${
+                  className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-300 ${
                     answers[currentQuestion] === option.value
-                      ? 'border-indigo-500 bg-indigo-500/20 text-white quiz-option-selected'
+                      ? 'border-indigo-500 bg-indigo-500/20 text-white'
                       : 'border-gray-600 bg-gray-800/50 text-gray-300 hover:border-indigo-400 hover:bg-indigo-500/10'
                   }`}
                 >
@@ -532,12 +379,11 @@ export default function CareerQuiz() {
               ))}
             </div>
 
-            {/* Navigation Buttons */}
             <div className="flex justify-between items-center">
               <button
                 onClick={handlePrevious}
                 disabled={currentQuestion === 0}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors nav-button ${
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
                   currentQuestion === 0
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : 'bg-gray-700 text-white hover:bg-gray-600'
@@ -554,7 +400,7 @@ export default function CareerQuiz() {
               <button
                 onClick={handleNextOrSubmit}
                 disabled={!answers[currentQuestion]}
-                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors nav-button ${
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
                   !answers[currentQuestion]
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : currentQuestion === questions.length - 1
@@ -562,7 +408,7 @@ export default function CareerQuiz() {
                     : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                 }`}
               >
-                {currentQuestion === questions.length - 1 ? 'Submit Quiz' : 'Next'}
+                {currentQuestion === questions.length - 1 ? 'Submit Assessment' : 'Next'}
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -570,225 +416,11 @@ export default function CareerQuiz() {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="relative z-10 text-center p-6">
         <p className="text-gray-400 text-sm">
-          Take your time and answer honestly for the best career recommendations.
+          Your responses help us create personalized NSQF-aligned training pathways.
         </p>
       </div>
-
-      {/* Custom CSS for advanced animations */}
-      <style>{`
-        .gradientShift {
-          background-size: 400% 400%;
-          animation: gradientShift 15s ease-in-out infinite;
-        }
-        
-        @keyframes gradientShift {
-          0% {
-            background-position: 0% 50%;
-            transform: scale(1);
-          }
-          25% {
-            background-position: 100% 50%;
-            transform: scale(1.02);
-          }
-          50% {
-            background-position: 100% 100%;
-            transform: scale(1);
-          }
-          75% {
-            background-position: 0% 100%;
-            transform: scale(1.01);
-          }
-          100% {
-            background-position: 0% 50%;
-            transform: scale(1);
-          }
-        }
-
-        @keyframes floatComplex {
-          0%, 100% {
-            transform: translateY(0px) translateX(0px) rotate(0deg) scale(1);
-            opacity: 0.2;
-          }
-          25% {
-            transform: translateY(-30px) translateX(20px) rotate(90deg) scale(1.2);
-            opacity: 0.4;
-          }
-          50% {
-            transform: translateY(-60px) translateX(-10px) rotate(180deg) scale(0.8);
-            opacity: 0.6;
-          }
-          75% {
-            transform: translateY(-30px) translateX(-30px) rotate(270deg) scale(1.1);
-            opacity: 0.3;
-          }
-        }
-
-        @keyframes sparkle {
-          0%, 100% {
-            opacity: 0.3;
-            transform: scale(0.5) rotate(0deg);
-            filter: blur(0px) brightness(1);
-          }
-          25% {
-            opacity: 0.8;
-            transform: scale(1.5) rotate(90deg);
-            filter: blur(1px) brightness(1.5);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(0.3) rotate(180deg);
-            filter: blur(0.5px) brightness(2);
-          }
-          75% {
-            opacity: 0.6;
-            transform: scale(1.2) rotate(270deg);
-            filter: blur(0.8px) brightness(1.2);
-          }
-        }
-
-        @keyframes wave {
-          0%, 100% {
-            transform: scale(1) rotate(0deg);
-            opacity: 0.1;
-          }
-          50% {
-            transform: scale(1.5) rotate(180deg);
-            opacity: 0.3;
-          }
-        }
-
-        @keyframes streak {
-          0% {
-            top: -100px;
-            opacity: 0;
-          }
-          10% {
-            opacity: 1;
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            top: 100vh;
-            opacity: 0;
-          }
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.3;
-          }
-          50% {
-            transform: scale(1.3);
-            opacity: 0.6;
-          }
-        }
-
-        @keyframes rotate {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        /* Enhanced quiz option animations */
-        .quiz-option {
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .quiz-option::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.2), transparent);
-          transition: left 0.6s;
-        }
-
-        .quiz-option:hover::before {
-          left: 100%;
-        }
-
-        .quiz-option:hover {
-          transform: translateY(-3px) scale(1.02);
-          box-shadow: 0 12px 30px -8px rgba(139, 92, 246, 0.4);
-          border-color: rgba(139, 92, 246, 0.8);
-        }
-
-        .quiz-option-selected {
-          transform: translateY(-2px) scale(1.01);
-          box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
-          animation: selectedPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes selectedPulse {
-          0%, 100% {
-            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
-          }
-          50% {
-            box-shadow: 0 15px 35px -5px rgba(59, 130, 246, 0.7);
-          }
-        }
-
-        /* Progress bar animation */
-        .progress-bar {
-          transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-          background: linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899);
-          background-size: 200% 100%;
-          animation: progressShine 3s ease-in-out infinite;
-        }
-
-        @keyframes progressShine {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-
-        /* Navigation button animations */
-        .nav-button {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .nav-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.3);
-        }
-
-        .nav-button:active {
-          transform: translateY(0);
-        }
-
-        /* Card entrance animation */
-        .quiz-card {
-          animation: cardEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes cardEntrance {
-          from {
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-      `}</style>
     </div>
   );
 }
