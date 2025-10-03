@@ -211,12 +211,12 @@ export const loginuser = async (req, res) => {
 
     const token = generateToken(user);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+  res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // true when deployed
+  sameSite: "None", // <-- must be "None" for cross-site
+  maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+});
 
     return res.status(200).json({
       success: true,
