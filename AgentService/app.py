@@ -689,13 +689,18 @@ def get_chat_history(user_id):
         return jsonify({"success": False, "message": str(e)}), 500
 
 # Explicit OPTIONS handlers for CORS preflight
+
+
+
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
     response.headers.add('Access-Control-Allow-Headers', 'Authorization, Content-Type')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
+
+
 
 if __name__ == "__main__":
     logger.info("🚀 Starting Skilling Progress Tracker & AI Career Advisor on port 5002...")
