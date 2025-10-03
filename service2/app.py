@@ -15,7 +15,7 @@ from time import sleep
 app = Flask(__name__)
 
 # Configure CORS to allow requests from frontend
-CORS(app, origins=[os.getenv("CLIENT_ORIGIN")], supports_credentials=True)
+CORS(app, origins=[os.getenv("app","CLIENT_ORIGIN", "https://pathforge-rkgq.onrender.com")], supports_credentials=True)
 # Configure rate limiter
 limiter = Limiter(
     get_remote_address,
