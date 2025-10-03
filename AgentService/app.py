@@ -17,23 +17,15 @@ import traceback
 import logging
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# CORS configuration
-CORS(
-    app,
-    origins=os.getenv("FRONTEND_URL", "https://pathforge-rkgq.onrender.com").split(","),
-    supports_credentials=True,
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type"]
-)
+CORS(app, origins="*", supports_credentials=True)
+
+
 
 # Configure rate limiter
 limiter = Limiter(
@@ -46,232 +38,136 @@ limiter = Limiter(
 # Configure cache: 1 hour TTL, max 100 items
 cache = TTLCache(maxsize=100, ttl=3600)
 
-# Custom exceptions
-class AppError(Exception):
-    """Base exception for application errors"""
-    pass
-
-class AssessmentError(AppError):
-    """Exception for assessment-related errors"""
-    pass
-
-class RoadmapError(AppError):
-    """Exception for roadmap generation errors"""
-    pass
-
 # Configure MongoDB
-def init_mongodb():
-    """Initialize MongoDB connection with proper error handling"""
-    try:
-        mongo_uri = os.getenv("MONGO_URI")
-        if not mongo_uri:
-            raise ValueError("MONGO_URI environment variable is required")
-        
-        client = MongoClient(
-            mongo_uri,
-            serverSelectionTimeoutMS=5000,
-            maxPoolSize=50,
-            minPoolSize=10,
-            maxIdleTimeMS=45000
-        )
-        
-        db = client["skilling_tracker"]
-        roadmaps_collection = db["roadmaps"]
-        progress_collection = db["progress"]
-        ai_chats_collection = db["ai_chats"]
-
-        # Create indexes
-        try:
-            existing_indexes = roadmaps_collection.index_information()
-            
-            # Handle user_id index
-            if "user_id_1" in existing_indexes:
-                if not existing_indexes["user_id_1"].get("unique", False):
-                    logger.info("Dropping old non-unique user_id index...")
-                    roadmaps_collection.drop_index("user_id_1")
-            
-            roadmaps_collection.create_index("user_id", unique=True, name="user_id_unique")
-            
-            # Drop problematic index if exists
-            if "roadmapId_1" in existing_indexes:
-                logger.info("Dropping problematic roadmapId_1 index...")
-                roadmaps_collection.drop_index("roadmapId_1")
-
-            # Create other indexes
-            progress_collection.create_index(
-                [("user_id", 1), ("roadmap_id", 1)], 
-                name="user_roadmap_idx"
-            )
-            progress_collection.create_index("step_id", name="step_id_idx")
-            ai_chats_collection.create_index("userId", name="userId_idx")
-            
-            logger.info("Database indexes created successfully")
-
-        except Exception as idx_error:
-            logger.warning(f"Index creation warning (non-critical): {str(idx_error)}")
-
-        # Test connection
-        client.admin.command("ping")
-        logger.info("MongoDB connected successfully")
-        
-        return client, db, roadmaps_collection, progress_collection, ai_chats_collection
-
-    except (ConnectionFailure, ServerSelectionTimeoutError) as e:
-        logger.error(f"Failed to connect to MongoDB: {str(e)}")
-        raise
-    except Exception as e:
-        logger.error(f"Unexpected MongoDB error: {str(e)}")
-        raise
-
-# Initialize database
 try:
-    client, db, roadmaps_collection, progress_collection, ai_chats_collection = init_mongodb()
+    mongo_uri = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+    client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
+    db = client["skilling_tracker"]
+    roadmaps_collection = db["roadmaps"]
+    progress_collection = db["progress"]
+    ai_chats_collection = db["ai_chats"]
+
+    try:
+        existing_indexes = roadmaps_collection.index_information()
+        if "user_id_1" in existing_indexes:
+            if not existing_indexes["user_id_1"].get("unique", False):
+                logger.info("⚠️ Dropping old non-unique user_id index...")
+                roadmaps_collection.drop_index("user_id_1")
+                roadmaps_collection.create_index("user_id", unique=True, name="user_id_unique")
+                logger.info("✅ Created new unique user_id index")
+        else:
+            roadmaps_collection.create_index("user_id", unique=True, name="user_id_unique")
+
+        # Drop problematic roadmapId index if it exists
+        if "roadmapId_1" in existing_indexes:
+            logger.info("⚠️ Dropping problematic roadmapId_1 index...")
+            roadmaps_collection.drop_index("roadmapId_1")
+            logger.info("✅ Dropped roadmapId_1 index")
+
+        progress_collection.create_index([("user_id", 1), ("roadmap_id", 1)], name="user_roadmap_idx")
+        progress_collection.create_index("step_id", name="step_id_idx")
+        ai_chats_collection.create_index("userId", name="userId_idx")
+
+    except Exception as idx_error:
+        logger.warning(f"⚠️ Index creation warning (non-critical): {str(idx_error)}")
+
+    client.admin.command("ping")
+    logger.info("✅ MongoDB connected successfully")
+
+except (ConnectionFailure, ServerSelectionTimeoutError) as e:
+    logger.error(f"❌ Failed to connect to MongoDB: {str(e)}")
+    raise
 except Exception as e:
-    logger.error(f"Failed to initialize database: {str(e)}")
+    logger.error(f"❌ Unexpected MongoDB error: {str(e)}")
     raise
 
 # Configure Gemini API
-def init_gemini_api():
-    """Initialize Gemini API with proper validation"""
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("GEMINI_API_KEY environment variable is required")
-    
-    try:
-        genai.configure(api_key=api_key)
-        logger.info("Gemini API configured successfully")
-    except Exception as e:
-        logger.error(f"Failed to configure Gemini API: {str(e)}")
-        raise
+try:
+    genai.configure(api_key="AIzaSyAI7PV5c3WLfLdTH6RlYMlcvWJH99w4VMo")
+    logger.info("✅ Gemini API configured successfully")
+except Exception as e:
+    logger.error(f"❌ Failed to configure Gemini API: {str(e)}")
+    raise
 
-init_gemini_api()
+# Debug route to confirm server is running
+@app.route("/api/test", methods=["GET"])
+def test_route():
+    logger.info("📡 Test route hit")
+    return jsonify({"success": True, "message": "Server is running"}), 200
 
-# Global error handlers
-@app.errorhandler(AppError)
-def handle_app_error(error):
-    """Handle custom application errors"""
-    logger.error(f"Application error: {str(error)}")
-    return jsonify({
-        "success": False,
-        "message": str(error),
-        "error_type": error.__class__.__name__
-    }), 400
-
-@app.errorhandler(500)
-def handle_internal_error(error):
-    """Handle internal server errors"""
-    logger.error(f"Internal error: {str(error)}")
-    traceback.print_exc()
-    return jsonify({
-        "success": False,
-        "message": "Internal server error"
-    }), 500
-
-@app.errorhandler(404)
-def handle_not_found(error):
-    """Handle 404 errors"""
-    return jsonify({
-        "success": False,
-        "message": "Resource not found"
-    }), 404
-
-# Helper functions
+# List available Gemini models
 def list_available_models():
-    """List available Gemini models"""
     try:
         models = genai.list_models()
-        available_models = [
-            model.name for model in models 
-            if 'generateContent' in model.supported_generation_methods
-        ]
-        logger.info(f"Available Gemini models: {available_models}")
+        available_models = [model.name for model in models if 'generateContent' in model.supported_generation_methods]
+        logger.info(f"✅ Available Gemini models: {available_models}")
         return available_models
     except Exception as e:
-        logger.error(f"Error listing models: {str(e)}")
+        logger.error(f"❌ Error listing models: {str(e)}")
+        traceback.print_exc()
         return []
 
+# Fetch assessment data from Node.js API
 def fetch_assessment_data(user_id, token=None):
-    """Fetch assessment data from Node.js API"""
     try:
         nodejs_url = os.getenv("BACKEND_URL", "http://localhost:3000")
         headers = {"Authorization": f"Bearer {token}"} if token else {}
-        logger.info(f"Fetching assessment for user {user_id}")
+        logger.info(f"🔑 Fetching assessment for user {user_id} with token: {'Present' if token else 'Missing'}")
         
         response = requests.get(
             f"{nodejs_url}/api/userinterest/status",
             params={'userId': user_id},
             headers=headers,
             cookies=request.cookies,
-            timeout=10
+            timeout=5
         )
 
-        logger.info(f"Assessment API Response: Status {response.status_code}")
+        logger.info(f"📡 Assessment API Response: Status {response.status_code}")
+        logger.info(f"📊 Full response: {response.text}")
 
         if response.status_code == 200:
             data = response.json()
             if not data.get("success"):
-                logger.warning(f"Node.js API returned success: false - {data.get('message')}")
+                logger.warning(f"⚠️ Node.js API returned success: false - {data.get('message', 'No message')}")
                 return []
-            
-            # Try different response formats
-            assessment_data = (
-                data.get("data", {}).get("starterAnswers") or
-                data.get("mentalHealthAnswers") or
-                []
-            )
-            
+            assessment_data = data.get("data", {}).get("starterAnswers", [])
             if assessment_data:
-                logger.info(f"Fetched {len(assessment_data)} assessment answers for user {user_id}")
+                logger.info(f"✅ Fetched {len(assessment_data)} starterAnswers for user {user_id}")
                 return assessment_data
-            
+            assessment_data = data.get("mentalHealthAnswers", [])
+            if assessment_data:
+                logger.info(f"✅ Fetched {len(assessment_data)} mentalHealthAnswers for user {user_id}")
+                return assessment_data
             if data.get("hasCompletedAssessment"):
-                logger.warning(f"Assessment completed but no answers returned for user {user_id}")
+                logger.warning(f"⚠️ Assessment completed but no answers returned for user {user_id}. Using placeholder.")
                 return [{"questionText": "Unknown", "selectedOption": "Assessment completed"}]
-            
-            logger.warning(f"No assessment data found for user {user_id}")
+            logger.warning(f"⚠️ No assessment data found for user {user_id}")
             return []
         else:
-            logger.warning(f"Failed to fetch assessment: Status {response.status_code}")
+            logger.warning(f"⚠️ Failed to fetch assessment: Status {response.status_code}")
             return []
 
-    except requests.exceptions.Timeout:
-        logger.error(f"Timeout fetching assessment for user {user_id}")
-        return []
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error fetching assessment for user {user_id}: {str(e)}")
+        logger.error(f"❌ Error fetching assessment for user {user_id}: {str(e)}")
+        traceback.print_exc()
         return []
 
-def get_available_model():
-    """Get first available Gemini model"""
-    model_names = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"]
-    
-    for model_name in model_names:
-        try:
-            model = genai.GenerativeModel(model_name)
-            logger.info(f"Using model: {model_name}")
-            return model
-        except Exception as e:
-            logger.warning(f"Model {model_name} not available: {str(e)}")
-    
-    # Try any available model
-    available = list_available_models()
-    if available:
-        model_name = available[0]
-        logger.info(f"Falling back to model: {model_name}")
-        return genai.GenerativeModel(model_name)
-    
-    raise RoadmapError("No AI models available")
+# Generate roadmap using Gemini
+def generate_roadmap_from_assessment(assessment_data, user_id):
+    cache_key = f"roadmap:{user_id}:{hash(str(assessment_data))}"
+    if cache_key in cache:
+        logger.info(f"📦 Cache hit for roadmap: {cache_key}")
+        return cache[cache_key], False
 
-def build_roadmap_prompt(assessment_data):
-    """Build prompt for AI roadmap generation"""
-    if assessment_data and len(assessment_data) > 0:
-        assessment_text = "\n".join([
-            f"Q: {item.get('questionText', item.get('question', 'Unknown'))}\n"
-            f"A: {item.get('selectedOption', item.get('answer', 'No answer'))}"
-            for item in assessment_data
-        ])
-        
-        return f"""Generate a personalized vocational training roadmap aligned with India's NSQF framework based on this user's career assessment.
+    try:
+        if assessment_data and len(assessment_data) > 0:
+            assessment_text = "\n".join([
+                f"Q: {item.get('questionText', item.get('question', 'Unknown'))}\nA: {item.get('selectedOption', item.get('answer', 'No answer'))}"
+                for item in assessment_data
+            ])
+            logger.info(f"📝 Assessment data for prompt: {assessment_text[:200]}...")
+
+            prompt = f"""Generate a personalized vocational training roadmap aligned with India's NSQF framework based on this user's career assessment.
 
 USER ASSESSMENT:
 {assessment_text}
@@ -290,9 +186,11 @@ Requirements:
 - Focus on employable skills for Indian job market (e.g., IT, healthcare, manufacturing)
 - Include relevant certifications
 - Ensure steps are actionable and progressive
-- Return ONLY valid JSON array"""
-    else:
-        return """Generate a general vocational training roadmap for Indian youth aligned with NSQF framework.
+- Return ONLY valid JSON array
+"""
+        else:
+            logger.warning("⚠️ No assessment data, using fallback roadmap")
+            prompt = """Generate a general vocational training roadmap for Indian youth aligned with NSQF framework.
 
 Requirements:
 - JSON array of 6 progressive steps
@@ -300,44 +198,28 @@ Requirements:
   - step_id: unique identifier
   - name, nsqf_level (1-10), description, duration, resources, skills, completed: false
 - Focus on employable skills for Indian job market
-- Return ONLY valid JSON array"""
+- Return ONLY valid JSON array
+"""
 
-def parse_roadmap_response(response_text):
-    """Parse and validate AI response"""
-    # Remove markdown code blocks
-    response_text = response_text.strip()
-    if response_text.startswith("```json"):
-        response_text = response_text[7:-3].strip()
-    elif response_text.startswith("```"):
-        response_text = response_text[3:-3].strip()
-    
-    try:
-        roadmap_steps = json.loads(response_text)
-    except json.JSONDecodeError as e:
-        logger.error(f"JSON parsing error: {str(e)}")
-        raise RoadmapError("Failed to parse AI response")
-    
-    # Validate and normalize steps
-    for i, step in enumerate(roadmap_steps):
-        step.setdefault("step_id", f"step_{i+1}")
-        step.setdefault("completed", False)
-        step.setdefault("skills", [])
-        step.setdefault("resources", [])
-    
-    return roadmap_steps
-
-def generate_roadmap_from_assessment(assessment_data, user_id):
-    """Generate roadmap using Gemini AI"""
-    cache_key = f"roadmap:{user_id}:{hash(str(assessment_data))}"
-    
-    # Check cache
-    if cache_key in cache:
-        logger.info(f"Cache hit for roadmap: {cache_key}")
-        return cache[cache_key], False
-
-    try:
-        prompt = build_roadmap_prompt(assessment_data)
-        model = get_available_model()
+        # Try models in order of preference
+        model_names = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-2.0-pro"]
+        model = None
+        for model_name in model_names:
+            try:
+                model = genai.GenerativeModel(model_name)
+                logger.info(f"✅ Using model: {model_name}")
+                break
+            except Exception as e:
+                logger.warning(f"⚠️ Model {model_name} not available: {str(e)}")
+        
+        if not model:
+            available_models = list_available_models()
+            if not available_models:
+                logger.error("❌ No available models found, using fallback roadmap")
+                return generate_fallback_roadmap(assessment_data), True
+            model_name = available_models[0]
+            logger.info(f"🔄 Falling back to model: {model_name}")
+            model = genai.GenerativeModel(model_name)
 
         max_retries = 3
         retry_delay = 5
@@ -345,53 +227,70 @@ def generate_roadmap_from_assessment(assessment_data, user_id):
         for attempt in range(max_retries):
             try:
                 response = model.generate_content(prompt)
-                roadmap_steps = parse_roadmap_response(response.text)
+                response_text = response.text.strip()
 
-                # Cache result
+                if response_text.startswith("```json"):
+                    response_text = response_text[7:-3].strip()
+                elif response_text.startswith("```"):
+                    response_text = response_text[3:-3].strip()
+
+                roadmap_steps = json.loads(response_text)
+
+                for i, step in enumerate(roadmap_steps):
+                    if "step_id" not in step:
+                        step["step_id"] = f"step_{i+1}"
+                    if "completed" not in step:
+                        step["completed"] = False
+                    if "skills" not in step:
+                        step["skills"] = []
+                    if "resources" not in step:
+                        step["resources"] = []
+
                 cache[cache_key] = roadmap_steps
-                logger.info(f"Generated roadmap with {len(roadmap_steps)} steps for user {user_id}")
+                logger.info(f"✅ Generated roadmap with {len(roadmap_steps)} steps for user {user_id}")
                 return roadmap_steps, False
 
             except google.api_core.exceptions.ResourceExhausted:
                 if attempt < max_retries - 1:
-                    logger.warning(f"Rate limit hit, retrying in {retry_delay}s...")
+                    logger.warning(f"⚠️ Rate limit hit, retrying in {retry_delay}s...")
                     sleep(retry_delay)
                     retry_delay *= 2
                 else:
-                    logger.error("Exhausted retries due to quota limit")
-                    raise RoadmapError("AI service quota exceeded")
-                    
-            except json.JSONDecodeError:
-                logger.error("Failed to parse AI response")
+                    logger.error("❌ Exhausted retries due to quota limit")
+                    raise
+            except json.JSONDecodeError as e:
+                logger.error(f"❌ JSON parsing error: {str(e)}")
                 break
-                
             except Exception as e:
-                logger.error(f"Model error: {str(e)}")
+                logger.error(f"❌ Model error: {str(e)}")
                 if attempt < max_retries - 1:
-                    try:
-                        model = get_available_model()
-                    except RoadmapError:
-                        break
+                    available_models = list_available_models()
+                    if not available_models:
+                        logger.error("❌ No available models, using fallback roadmap")
+                        return generate_fallback_roadmap(assessment_data), True
+                    model_name = available_models[0]
+                    logger.info(f"🔄 Retrying with model: {model_name}")
+                    model = genai.GenerativeModel(model_name)
                 else:
-                    break
+                    logger.error("❌ Exhausted retries, using fallback roadmap")
+                    return generate_fallback_roadmap(assessment_data), True
 
     except Exception as e:
-        logger.error(f"Error generating roadmap: {str(e)}")
+        logger.error(f"❌ Error generating roadmap: {str(e)}")
+        traceback.print_exc()
+        return generate_fallback_roadmap(assessment_data), True
 
-    # Fallback to default roadmap
-    logger.info("Using fallback roadmap")
-    return generate_fallback_roadmap(assessment_data), True
-
+# Fallback roadmap
 def generate_fallback_roadmap(assessment_data):
-    """Generate fallback roadmap when AI is unavailable"""
-    logger.info("Generating fallback roadmap")
-    
+    logger.info("📝 Generating fallback roadmap")
+    # Check if assessment_data indicates Manufacturing & Engineering interest
     is_manufacturing = any(
         item.get("selectedOption", "") == "Manufacturing & Engineering"
-        for item in (assessment_data or [])
-    )
+        for item in assessment_data
+    ) if assessment_data else False
 
     if is_manufacturing:
+        logger.info("📝 Using Manufacturing & Engineering fallback roadmap")
         return [
             {
                 "step_id": "step_1",
@@ -425,6 +324,7 @@ def generate_fallback_roadmap(assessment_data):
             }
         ]
     else:
+        logger.info("📝 Using IT-focused fallback roadmap")
         return [
             {
                 "step_id": "step_1",
@@ -458,83 +358,91 @@ def generate_fallback_roadmap(assessment_data):
             }
         ]
 
+# Generate AI career advice
 def generate_career_advice(user_message, user_id, assessment_data=None):
-    """Generate AI career advice"""
     try:
         prompt = "You are a career counselor for Indian youth aligned with NSQF framework.\n"
-        
         if assessment_data and len(assessment_data) > 0:
             assessment_summary = "\n".join([
-                f"- {item.get('questionText', item.get('question', 'Q'))}: "
-                f"{item.get('selectedOption', item.get('answer', 'N/A'))}"
+                f"- {item.get('questionText', item.get('question', 'Q'))}: {item.get('selectedOption', item.get('answer', 'N/A'))}"
                 for item in assessment_data[:5]
             ])
+            logger.info(f"📝 Career advice assessment data: {assessment_summary[:200]}...")
             prompt += f"USER ASSESSMENT:\n{assessment_summary}\n"
         
-        prompt += f"USER QUESTION: {user_message}\n"
+        prompt += f"USER QUESTION: {user_message}\n" if user_message else ""
         prompt += """Provide personalized career advice with:
 - Actionable steps
 - Relevant Indian training programs (NIELIT, PMKVY, etc.)
 - NSQF-aligned certifications
 - Focus on employability in Indian job market
 Keep response concise (200-300 words) and encouraging.
-End with: "For personalized guidance, consult a career counselor." """
+End with: "💡 For personalized guidance, consult a career counselor."
+"""
 
-        model = get_available_model()
+        model_names = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-2.0-pro"]
+        model = None
+        for model_name in model_names:
+            try:
+                model = genai.GenerativeModel(model_name)
+                logger.info(f"✅ Using model: {model_name}")
+                break
+            except Exception as e:
+                logger.warning(f"⚠️ Model {model_name} not available: {str(e)}")
+        
+        if not model:
+            available_models = list_available_models()
+            if not available_models:
+                logger.error("❌ No available models, using fallback advice")
+                return ("I'm here to help with career guidance! Could you please rephrase your question? "
+                        "💡 For personalized guidance, consult a career counselor.")
+            model_name = available_models[0]
+            logger.info(f"🔄 Falling back to model: {model_name}")
+            model = genai.GenerativeModel(model_name)
+
         response = model.generate_content(prompt)
-        logger.info(f"Generated career advice for user {user_id}")
+        logger.info(f"✅ Generated career advice for user {user_id}")
         return response.text.strip()
 
     except Exception as e:
-        logger.error(f"Error in career advice: {str(e)}")
+        logger.error(f"❌ Error in career advice: {str(e)}")
+        traceback.print_exc()
         return ("I'm here to help with career guidance! Could you please rephrase your question? "
-                "For personalized guidance, consult a career counselor.")
+                "💡 For personalized guidance, consult a career counselor.")
 
-# Routes
-@app.route("/api/test", methods=["GET", "OPTIONS"])
-@limiter.exempt
-def test_route():
-    """Test endpoint"""
-    return jsonify({"success": True, "message": "Server is running"}), 200
-
-@app.route("/health", methods=["GET", "OPTIONS"])
-@limiter.exempt
+# Endpoints
+@app.route("/health", methods=["GET"])
 def health_check():
-    """Health check endpoint"""
+    logger.info("📡 Health check hit")
     return jsonify({
-        "status": "healthy",
-        "service": "Skilling Progress Tracker & AI Career Advisor",
+        "status": "Skilling Progress Tracker & AI Career Advisor",
         "timestamp": datetime.now().isoformat()
     }), 200
 
-@app.route("/api/roadmap/generate", methods=["POST", "OPTIONS"])
+@app.route("/api/progress/api/roadmap/generate", methods=["POST"])
 @limiter.limit("5 per minute")
 def generate_roadmap():
-    """Generate personalized roadmap"""
-    if request.method == "OPTIONS":
-        return jsonify({"success": True}), 200
-    
     try:
+        logger.info(f"📡 Received POST /api/progress/api/roadmap/generate")
         data = request.get_json()
-        if not data:
-            return jsonify({"success": False, "message": "Request body is required"}), 400
-        
         user_id = data.get("user_id") or data.get("userId")
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
 
         if not user_id:
+            logger.error("❌ user_id is required")
             return jsonify({"success": False, "message": "user_id is required"}), 400
 
-        # Fetch assessment data
+        logger.info(f"🔑 Generate roadmap token: {'Present' if token else 'Missing'}")
+
         assessment_data = fetch_assessment_data(user_id, token)
         if not assessment_data:
+            logger.warning("⚠️ No assessment found for user")
             return jsonify({
                 "success": False,
                 "message": "No assessment found. Please complete the career assessment first.",
                 "redirect": "/assessment"
             }), 404
 
-        # Generate roadmap
         roadmap_steps, is_fallback = generate_roadmap_from_assessment(assessment_data, user_id)
         roadmap_id = str(uuid.uuid4())
 
@@ -548,21 +456,32 @@ def generate_roadmap():
             "updated_at": datetime.now()
         }
 
-        # Save to database
         try:
             roadmaps_collection.replace_one(
                 {"user_id": user_id},
                 roadmap_doc,
                 upsert=True
             )
-            logger.info(f"Roadmap saved for user {user_id} (Fallback: {is_fallback})")
-        except DuplicateKeyError:
-            logger.error("Duplicate key error while saving roadmap")
-            # Continue anyway, return the generated roadmap
+            logger.info(f"✅ Roadmap saved for user {user_id} (Fallback: {is_fallback})")
+        except DuplicateKeyError as e:
+            logger.error(f"❌ Duplicate key error while saving roadmap: {str(e)}")
+            # Return the generated roadmap even if saving fails
+            logger.warning(f"⚠️ Returning generated roadmap without saving for user {user_id}")
+            return jsonify({
+                "success": True,
+                "message": "Roadmap generated but could not be saved due to database error",
+                "data": {
+                    "roadmap_id": roadmap_id,
+                    "user_id": user_id,
+                    "steps": roadmap_steps,
+                    "total_steps": len(roadmap_steps),
+                    "is_fallback": is_fallback
+                }
+            }), 201
 
         return jsonify({
             "success": True,
-            "message": "Roadmap generated successfully" if not is_fallback else "Roadmap generated using fallback mode",
+            "message": "Roadmap generated successfully" if not is_fallback else "Generic roadmap generated due to API issues",
             "data": {
                 "roadmap_id": roadmap_id,
                 "user_id": user_id,
@@ -573,41 +492,37 @@ def generate_roadmap():
         }), 201
 
     except Exception as e:
-        logger.error(f"Error generating roadmap: {str(e)}")
+        logger.error(f"❌ Error generating roadmap: {str(e)}")
         traceback.print_exc()
-        return jsonify({"success": False, "message": "Failed to generate roadmap"}), 500
+        return jsonify({"success": False, "message": f"Failed to generate roadmap: {str(e)}"}), 500
 
-@app.route("/api/roadmap/<user_id>", methods=["GET", "OPTIONS"])
+@app.route("/api/progress/api/roadmap/<user_id>", methods=["GET"])
 @limiter.limit("20 per minute")
 def get_roadmap(user_id):
-    """Get user's roadmap"""
-    if request.method == "OPTIONS":
-        return jsonify({"success": True}), 200
-    
     try:
+        logger.info(f"📡 Received GET /api/progress/api/roadmap/{user_id}")
         start_time = datetime.now()
-        
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        logger.info(f"🔑 Get roadmap token: {'Present' if token else 'Missing'}")
+
         roadmap = roadmaps_collection.find_one({"user_id": user_id})
         if not roadmap:
-            return jsonify({"success": False, "message": "No roadmap found"}), 404
+            logger.warning(f"⚠️ No roadmap found for user {user_id}")
+            return jsonify({"success": False, "message": "No roadmap found."}), 404
 
-        # Get progress
         progress_records = list(progress_collection.find({"user_id": user_id}))
         completed_step_ids = {p["step_id"] for p in progress_records if p.get("completed")}
 
-        # Update step completion status
         steps = roadmap["steps"]
         for step in steps:
             step["completed"] = step["step_id"] in completed_step_ids
 
-        # Calculate progress
         total_steps = len(steps)
         completed_steps = len(completed_step_ids)
         progress_percentage = (completed_steps / total_steps * 100) if total_steps > 0 else 0
 
         query_duration = (datetime.now() - start_time).total_seconds()
-        logger.info(f"Roadmap fetched for user {user_id} in {query_duration:.2f}s")
-        
+        logger.info(f"✅ Roadmap fetched for user {user_id} in {query_duration:.2f}s")
         return jsonify({
             "success": True,
             "data": {
@@ -626,40 +541,37 @@ def get_roadmap(user_id):
         }), 200
 
     except Exception as e:
-        logger.error(f"Error fetching roadmap: {str(e)}")
+        logger.error(f"❌ Error fetching roadmap: {str(e)}")
         traceback.print_exc()
-        return jsonify({"success": False, "message": "Failed to fetch roadmap"}), 500
+        return jsonify({"success": False, "message": f"Failed to fetch roadmap: {str(e)}"}), 500
 
-@app.route("/api/progress/update", methods=["POST", "OPTIONS"])
+@app.route("/api/progress/update", methods=["POST"])
 @limiter.limit("20 per minute")
 def update_progress():
-    """Update step progress"""
-    if request.method == "OPTIONS":
-        return jsonify({"success": True}), 200
-    
     try:
+        logger.info(f"📡 Received POST /api/progress/update")
         data = request.get_json()
-        if not data:
-            return jsonify({"success": False, "message": "Request body is required"}), 400
-        
         user_id = data.get("user_id")
         step_id = data.get("step_id")
         completed = data.get("completed", True)
 
         if not user_id or not step_id:
+            logger.error("❌ user_id and step_id are required")
             return jsonify({"success": False, "message": "user_id and step_id are required"}), 400
 
-        # Verify roadmap exists
+        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        logger.info(f"🔑 Update progress token: {'Present' if token else 'Missing'}")
+
         roadmap = roadmaps_collection.find_one({"user_id": user_id})
         if not roadmap:
+            logger.warning(f"⚠️ Roadmap not found for user {user_id}")
             return jsonify({"success": False, "message": "Roadmap not found"}), 404
 
-        # Verify step exists
         step_exists = any(step["step_id"] == step_id for step in roadmap["steps"])
         if not step_exists:
+            logger.warning(f"⚠️ Step {step_id} not found in roadmap")
             return jsonify({"success": False, "message": "Step not found in roadmap"}), 404
 
-        # Update progress
         if completed:
             progress_doc = {
                 "progress_id": str(uuid.uuid4()),
@@ -674,20 +586,18 @@ def update_progress():
                 {"$set": progress_doc},
                 upsert=True
             )
-            message = "Step marked as completed"
+            message = "Step marked as completed! 🎉"
         else:
             progress_collection.delete_one({"user_id": user_id, "step_id": step_id})
             message = "Step marked as incomplete"
 
-        # Calculate new progress
         progress_records = list(progress_collection.find({"user_id": user_id}))
         completed_step_ids = {p["step_id"] for p in progress_records if p.get("completed")}
         total_steps = len(roadmap["steps"])
         completed_count = len(completed_step_ids)
         progress_percentage = (completed_count / total_steps * 100) if total_steps > 0 else 0
 
-        logger.info(f"Progress updated for user {user_id}, step {step_id}")
-        
+        logger.info(f"✅ Progress updated for user {user_id}, step {step_id}")
         return jsonify({
             "success": True,
             "message": message,
@@ -703,52 +613,45 @@ def update_progress():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error updating progress: {str(e)}")
+        logger.error(f"❌ Error updating progress: {str(e)}")
         traceback.print_exc()
-        return jsonify({"success": False, "message": "Failed to update progress"}), 500
+        return jsonify({"success": False, "message": f"Failed to update progress: {str(e)}"}), 500
 
-@app.route("/api/ai-chat", methods=["POST", "OPTIONS"])
+@app.route("/api/ai-chat", methods=["POST"])
 @limiter.limit("10 per minute")
 def ai_chat():
-    """AI career advice chat"""
-    if request.method == "OPTIONS":
-        return jsonify({"success": True}), 200
-    
     try:
+        logger.info(f"📡 Received POST /api/ai-chat")
         data = request.get_json()
-        if not data:
-            return jsonify({"success": False, "message": "Request body is required"}), 400
-        
         user_message = data.get("message", "").strip()
         user_id = data.get("userId") or data.get("user_id")
         token = request.headers.get("Authorization", "").replace("Bearer ", "")
 
         if not user_message or not user_id:
+            logger.error("❌ message and user_id are required")
             return jsonify({"success": False, "message": "message and user_id are required"}), 400
 
-        # Fetch assessment for context
+        logger.info(f"🔑 AI chat token: {'Present' if token else 'Missing'}")
+
         assessment_data = fetch_assessment_data(user_id, token)
-        
-        # Generate advice
         ai_response = generate_career_advice(user_message, user_id, assessment_data)
 
-        # Save chat history
-        chat_messages = [
-            {"role": "user", "content": user_message, "timestamp": datetime.now()},
-            {"role": "assistant", "content": ai_response, "timestamp": datetime.now()}
-        ]
+        chat_doc = {
+            "userId": user_id,
+            "messages": [
+                {"role": "user", "content": user_message, "timestamp": datetime.now()},
+                {"role": "assistant", "content": ai_response, "timestamp": datetime.now()}
+            ],
+            "createdAt": datetime.now()
+        }
 
         ai_chats_collection.update_one(
             {"userId": user_id},
-            {
-                "$push": {"messages": {"$each": chat_messages}},
-                "$setOnInsert": {"createdAt": datetime.now()}
-            },
+            {"$push": {"messages": {"$each": chat_doc["messages"]}}},
             upsert=True
         )
 
-        logger.info(f"AI chat response generated for user {user_id}")
-        
+        logger.info(f"✅ AI chat response generated for user {user_id}")
         return jsonify({
             "success": True,
             "response": ai_response,
@@ -757,28 +660,21 @@ def ai_chat():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error in AI chat: {str(e)}")
+        logger.error(f"❌ Error in AI chat: {str(e)}")
         traceback.print_exc()
-        return jsonify({"success": False, "message": "Failed to get AI response"}), 500
+        return jsonify({"success": False, "message": f"Failed to get AI response: {str(e)}"}), 500
 
-@app.route("/api/ai-chat/history/<user_id>", methods=["GET", "OPTIONS"])
+@app.route("/api/ai-chat/history/<user_id>", methods=["GET"])
 @limiter.limit("10 per minute")
 def get_chat_history(user_id):
-    """Get chat history"""
-    if request.method == "OPTIONS":
-        return jsonify({"success": True}), 200
-    
     try:
+        logger.info(f"📡 Received GET /api/ai-chat/history/{user_id}")
         chat = ai_chats_collection.find_one({"userId": user_id})
-        
         if not chat:
-            return jsonify({
-                "success": True,
-                "data": {"userId": user_id, "messages": []}
-            }), 200
+            logger.warning(f"⚠️ No chat history found for user {user_id}")
+            return jsonify({"success": True, "data": {"messages": []}}), 200
 
-        logger.info(f"Chat history fetched for user {user_id}")
-        
+        logger.info(f"✅ Chat history fetched for user {user_id}")
         return jsonify({
             "success": True,
             "data": {
@@ -788,20 +684,29 @@ def get_chat_history(user_id):
         }), 200
 
     except Exception as e:
-        logger.error(f"Error fetching chat history: {str(e)}")
+        logger.error(f"❌ Error fetching chat history: {str(e)}")
         traceback.print_exc()
-        return jsonify({"success": False, "message": "Failed to fetch chat history"}), 500
+        return jsonify({"success": False, "message": str(e)}), 500
 
-# Run application
+# Explicit OPTIONS handlers for CORS preflight
+
+
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
+    response.headers.add('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+
+
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5002))
-    logger.info(f"Starting Skilling Progress Tracker & AI Career Advisor on port {port}...")
-    
+    logger.info("🚀 Starting Skilling Progress Tracker & AI Career Advisor on port 5002...")
     try:
         from waitress import serve
-        logger.info("Using Waitress WSGI server")
-        serve(app, host="0.0.0.0", port=port, threads=4)
+        serve(app, host="0.0.0.0", port=5002, threads=4)
     except ImportError:
-        logger.warning("Waitress not installed. Using Flask development server")
-        logger.warning("For production, install Waitress: pip install waitress")
-        app.run(host="0.0.0.0", port=port, debug=False)
+        logger.warning("⚠️ Waitress not installed. Falling back to Flask dev server")
+        app.run(host="0.0.0.0", port=5002, debug=True, use_reloader=False)
