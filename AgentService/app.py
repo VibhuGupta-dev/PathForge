@@ -22,7 +22,11 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app,supports_credentials=True)
+CORS(app, origins=[
+    "http://localhost:5173",
+    "https://pathforge-rkgq.onrender.com"
+], supports_credentials=True)
+
 
 
 # Configure rate limiter
