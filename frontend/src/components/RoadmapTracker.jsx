@@ -9,9 +9,10 @@ const RoadmapTracker = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [generatingRoadmap, setGeneratingRoadmap] = useState(false);
+  const [polling, setPolling] = useState(false);
 
   const VITE_AI_BACKEND_URL = import.meta.env.VITE_AI_BACKEND_URL || "http://localhost:5002";
-  const token = localStorage.getItem('token');  // Get token for auth
+  const token = localStorage.getItem("token"); // Get token for auth
 
   useEffect(() => {
     console.log("RoadmapTracker: User ID:", user?.id, "Token:", token ? token.slice(0, 20) + "..." : "Missing");
@@ -40,12 +41,12 @@ const RoadmapTracker = ({ user }) => {
         `${VITE_AI_BACKEND_URL}/api/progress/api/roadmap/${user.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          timeout: 200000, 
+          timeout: 30000, // 30 seconds for fetching existing roadmap
         }
       );
-      
+
       console.log("Roadmap fetch response:", response.data);
-      
+
       if (response.data.success) {
         setRoadmap(response.data.data);
       } else {
@@ -58,14 +59,63 @@ const RoadmapTracker = ({ user }) => {
         setRoadmap(null);
       } else if (error.code === "ECONNREFUSED") {
         setError("AI service is unavailable. Please contact support.");
+      } else if (error.code === "ECONNABORTED") {
+        setError("Request timed out. Please try again or contact support.");
       } else {
-        setError(
-          error.response?.data?.message ||
-          "Failed to fetch roadmap. Please try again."
-        );
+        setError(error.response?.data?.message || "Failed to fetch roadmap. Please try again.");
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const pollRoadmapStatus = async () => {
+    setPolling(true);
+    setError(null);
+    try {
+      const interval = setInterval(async () => {
+        try {
+          const response = await axios.get(
+            `${VITE_AI_BACKEND_URL}/api/progress/api/roadmap/status/${user.id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              timeout: 30000,
+            }
+          );
+          console.log("Polling status response:", response.data);
+
+          if (response.data.success && response.data.data) {
+            setRoadmap(response.data.data);
+            clearInterval(interval);
+            setPolling(false);
+            setGeneratingRoadmap(false);
+          } else if (response.data.status === "processing") {
+            // Keep polling
+            console.log("Roadmap still processing...");
+          } else {
+            clearInterval(interval);
+            setPolling(false);
+            setGeneratingRoadmap(false);
+            setError(response.data.message || "Failed to generate roadmap.");
+          }
+        } catch (error) {
+          console.error("Polling error:", error);
+          clearInterval(interval);
+          setPolling(false);
+          setGeneratingRoadmap(false);
+          setError(
+            error.response?.data?.message ||
+              error.code === "ECONNREFUSED"
+              ? "AI service is unavailable. Please contact support."
+              : "Failed to check roadmap status. Please try again."
+          );
+        }
+      }, 5000); // Poll every 5 seconds
+    } catch (error) {
+      console.error("Polling setup error:", error);
+      setPolling(false);
+      setGeneratingRoadmap(false);
+      setError("Failed to initiate roadmap status check. Please try again.");
     }
   };
 
@@ -80,22 +130,23 @@ const RoadmapTracker = ({ user }) => {
       console.log(`Generating roadmap for user: ${user.id} at ${VITE_AI_BACKEND_URL}/api/progress/api/roadmap/generate`);
       console.log("Request body:", { user_id: user.id });
       console.log("Request headers:", { Authorization: `Bearer ${token.slice(0, 20)}...` });
-      
+
       const response = await axios.post(
         `${VITE_AI_BACKEND_URL}/api/progress/api/roadmap/generate`,
         { user_id: user.id },
         {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          timeout: 120000,
+          timeout: 60000, // 60 seconds for initial generation trigger
         }
       );
-      
+
       console.log("Roadmap generation response:", response.data);
-      
+
       if (response.data.success) {
-        setRoadmap(response.data.data);
-        setError(null);
+        // Start polling for roadmap status
+        pollRoadmapStatus();
       } else {
+        setGeneratingRoadmap(false);
         if (response.data.redirect === "/assessment") {
           setError("Please complete the career assessment first before generating a roadmap.");
         } else {
@@ -105,19 +156,16 @@ const RoadmapTracker = ({ user }) => {
     } catch (error) {
       console.error("Error generating roadmap:", error);
       console.log("Error response:", error.response?.data);
-      
+      setGeneratingRoadmap(false);
       if (error.code === "ECONNREFUSED") {
         setError("AI service is unavailable. Please contact support.");
       } else if (error.response?.status === 404) {
         setError("Please complete the career assessment first.");
+      } else if (error.code === "ECONNABORTED") {
+        setError("Request timed out. Please try again or contact support.");
       } else {
-        setError(
-          error.response?.data?.message ||
-          "Failed to generate roadmap. Please try again."
-        );
+        setError(error.response?.data?.message || "Failed to generate roadmap. Please try again.");
       }
-    } finally {
-      setGeneratingRoadmap(false);
     }
   };
 
@@ -128,7 +176,7 @@ const RoadmapTracker = ({ user }) => {
     }
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log(`Updating progress for step ${stepId}, user ${user.id}`);
       const response = await axios.post(
@@ -140,19 +188,17 @@ const RoadmapTracker = ({ user }) => {
         },
         {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          timeout: 200000,
+          timeout: 30000, // 30 seconds for progress update
         }
       );
-      
+
       console.log("Progress update response:", response.data);
-      
+
       if (response.data.success) {
         setRoadmap((prev) => ({
           ...prev,
           steps: prev.steps.map((step) =>
-            step.step_id === stepId
-              ? { ...step, completed: !currentStatus }
-              : step
+            step.step_id === stepId ? { ...step, completed: !currentStatus } : step
           ),
         }));
       } else {
@@ -162,7 +208,9 @@ const RoadmapTracker = ({ user }) => {
       console.error("Error updating progress:", error);
       setError(
         error.response?.data?.message ||
-        "Failed to update progress. Please try again."
+          error.code === "ECONNABORTED"
+          ? "Request timed out. Please try again."
+          : "Failed to update progress. Please try again."
       );
     } finally {
       setLoading(false);
@@ -190,9 +238,7 @@ const RoadmapTracker = ({ user }) => {
           </h3>
           {roadmap && (
             <div className="text-right">
-              <div className="text-3xl font-bold text-teal-600">
-                {calculateProgress()}%
-              </div>
+              <div className="text-3xl font-bold text-teal-600">{calculateProgress()}%</div>
               <div className="text-sm text-gray-500">Complete</div>
             </div>
           )}
@@ -211,18 +257,18 @@ const RoadmapTracker = ({ user }) => {
       </div>
 
       {/* Loading State */}
-      {(loading || generatingRoadmap) && (
+      {(loading || polling) && (
         <div className="flex flex-col items-center justify-center gap-4 py-12">
           <Loader className="w-12 h-12 text-teal-500 animate-spin" />
           <span className="text-lg text-gray-600">
-            {generatingRoadmap ? "Generating your personalized roadmap..." : "Loading..."}
+            {polling ? "Generating your personalized roadmap... This may take a minute." : "Loading..."}
           </span>
         </div>
       )}
 
       {/* Error State */}
       <AnimatePresence>
-        {error && !loading && (
+        {error && !loading && !polling && (
           <motion.div
             className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700"
             initial={{ opacity: 0, y: -10 }}
@@ -236,7 +282,7 @@ const RoadmapTracker = ({ user }) => {
       </AnimatePresence>
 
       {/* No Roadmap State */}
-      {!loading && !error && !roadmap && !generatingRoadmap && (
+      {!loading && !error && !roadmap && !generatingRoadmap && !polling && (
         <motion.div
           className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 p-8 text-center"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -246,33 +292,29 @@ const RoadmapTracker = ({ user }) => {
             <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <Book className="w-10 h-10 text-white" />
             </div>
-            <h4 className="text-xl font-bold mb-3 text-gray-800">
-              Ready to Start Your Journey?
-            </h4>
+            <h4 className="text-xl font-bold mb-3 text-gray-800">Ready to Start Your Journey?</h4>
             <p className="text-gray-600 mb-6">
               Generate a personalized career roadmap based on your assessment and career goals.
             </p>
             <FloatingButton
               onClick={generateRoadmap}
-              disabled={generatingRoadmap || !token}
+              disabled={generatingRoadmap || polling || !token}
               className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 px-8 py-3 text-lg"
             >
-              {generatingRoadmap ? "Generating..." : "Generate My Roadmap"}
+              {generatingRoadmap || polling ? "Generating..." : "Generate My Roadmap"}
             </FloatingButton>
           </div>
         </motion.div>
       )}
 
       {/* Roadmap Steps */}
-      {!loading && roadmap && (
+      {!loading && !polling && roadmap && (
         <div className="space-y-4">
           {roadmap.steps.map((step, index) => (
             <motion.div
               key={step.step_id}
               className={`bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border transition-all duration-300 overflow-hidden ${
-                step.completed
-                  ? "border-teal-300 bg-teal-50/50"
-                  : "border-white/20 hover:border-teal-200"
+                step.completed ? "border-teal-300 bg-teal-50/50" : "border-white/20 hover:border-teal-200"
               }`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -284,9 +326,7 @@ const RoadmapTracker = ({ user }) => {
                   {/* Step Number */}
                   <div
                     className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
-                      step.completed
-                        ? "bg-teal-500 text-white"
-                        : "bg-gray-200 text-gray-600"
+                      step.completed ? "bg-teal-500 text-white" : "bg-gray-200 text-gray-600"
                     }`}
                   >
                     {step.completed ? "✓" : index + 1}
@@ -296,9 +336,7 @@ const RoadmapTracker = ({ user }) => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <div>
-                        <h4 className="text-lg font-bold text-gray-800 mb-1">
-                          {step.name}
-                        </h4>
+                        <h4 className="text-lg font-bold text-gray-800 mb-1">{step.name}</h4>
                         <div className="flex items-center gap-3 text-sm text-gray-500">
                           <span className="flex items-center gap-1">
                             <Award size={14} />
@@ -312,7 +350,7 @@ const RoadmapTracker = ({ user }) => {
                           )}
                         </div>
                       </div>
-                      
+
                       <FloatingButton
                         onClick={() => toggleStepComplete(step.step_id, step.completed)}
                         disabled={loading || !token}
@@ -331,15 +369,10 @@ const RoadmapTracker = ({ user }) => {
                     {/* Skills */}
                     {step.skills && step.skills.length > 0 && (
                       <div className="mb-3">
-                        <p className="text-sm font-semibold text-gray-600 mb-2">
-                          Skills You'll Gain:
-                        </p>
+                        <p className="text-sm font-semibold text-gray-600 mb-2">Skills You'll Gain:</p>
                         <div className="flex flex-wrap gap-2">
                           {step.skills.map((skill, idx) => (
-                            <span
-                              key={idx}
-                              className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full"
-                            >
+                            <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
                               {skill}
                             </span>
                           ))}
@@ -350,15 +383,10 @@ const RoadmapTracker = ({ user }) => {
                     {/* Resources */}
                     {step.resources && step.resources.length > 0 && (
                       <div>
-                        <p className="text-sm font-semibold text-gray-600 mb-2">
-                          Recommended Resources:
-                        </p>
+                        <p className="text-sm font-semibold text-gray-600 mb-2">Recommended Resources:</p>
                         <ul className="space-y-1">
                           {step.resources.map((resource, idx) => (
-                            <li
-                              key={idx}
-                              className="flex items-center gap-2 text-sm text-teal-600 hover:text-teal-700"
-                            >
+                            <li key={idx} className="flex items-center gap-2 text-sm text-teal-600 hover:text-teal-700">
                               <ExternalLink size={14} />
                               {resource}
                             </li>
@@ -376,10 +404,10 @@ const RoadmapTracker = ({ user }) => {
           <div className="text-center pt-6">
             <FloatingButton
               onClick={generateRoadmap}
-              disabled={generatingRoadmap || !token}
+              disabled={generatingRoadmap || polling || !token}
               className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
             >
-              {generatingRoadmap ? "Regenerating..." : "🔄 Regenerate Roadmap"}
+              {generatingRoadmap || polling ? "Regenerating..." : "🔄 Regenerate Roadmap"}
             </FloatingButton>
           </div>
         </div>
