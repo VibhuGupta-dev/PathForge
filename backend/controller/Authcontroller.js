@@ -114,12 +114,13 @@ export const verifyRegistrationOTP = async (req, res) => {
     const token = generateToken(user);
 
     // Set cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
-    });
+   res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // true when deployed
+  sameSite: "None", // <-- must be "None" for cross-site
+  maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+});
+
 
     return res.status(201).json({
       success: true,
