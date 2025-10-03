@@ -23,7 +23,17 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 
-CORS(app, origins="*", supports_credentials=True)
+
+
+# Allow only your frontend origin
+CORS(
+    app,
+    origins="https://pathforge-rkgq.onrender.com",
+    supports_credentials=True,
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"]
+)
+
 
 
 

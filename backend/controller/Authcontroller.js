@@ -2,6 +2,7 @@ import Joi from "joi";
 import userModel from "../models/Usermodel.js";
 import { sendOTPEmail } from "../utils/Emailservice.js";
 import generateToken from "../utils/GenerateToken.js";
+import cors from "cors"; // Add CORS middleware
 
 // Temporary in-memory OTP store (replace with Redis or DB in production)
 const otpStore = new Map();
@@ -20,7 +21,6 @@ const registrationSchema = Joi.object({
     "string.empty": "Password is required",
   }),
   contact: Joi.string().required().messages({
-    // Changed to string to match schema
     "string.empty": "Contact is required",
   }),
 });
@@ -35,6 +35,18 @@ const otpVerificationSchema = Joi.object({
     "string.empty": "OTP is required",
   }),
 });
+
+// CORS configuration
+// Replace with your frontend's actual origin in production
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://localhost:5173", // Update with your frontend URL
+  credentials: true, // Allow cookies to be sent/received
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+// Apply CORS middleware (add this to your Express app setup, e.g., in app.js or index.js)
+// app.use(cors(corsOptions));
 
 // Send OTP for registration
 export const sendRegistrationOTP = async (req, res) => {
@@ -114,13 +126,13 @@ export const verifyRegistrationOTP = async (req, res) => {
     const token = generateToken(user);
 
     // Set cookie
-   res.cookie("token", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production", // true when deployed
-  sameSite: "None", // <-- must be "None" for cross-site
-  maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
-});
-
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // true in production (HTTPS)
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Use "Lax" for local dev
+      maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+      path: "/", // Ensure cookie is available for all routes
+    });
 
     return res.status(201).json({
       success: true,
@@ -145,31 +157,29 @@ export const verifyRegistrationOTP = async (req, res) => {
 export const resendOTP = async (req, res) => {
   try {
     const { email } = req.body;
-
-    // Validate email
     const { error } = Joi.object({
       email: Joi.string().email().required().messages({
         "string.email": "Please enter a valid email address",
         "string.empty": "Email is required",
       }),
     }).validate({ email });
+
     if (error) {
       return res.status(400).json({ success: false, message: error.details[0].message });
     }
 
-    // Check if email exists in OTP store
     const storedData = otpStore.get(email);
     if (!storedData) {
       return res.status(400).json({ success: false, message: "No OTP request found for this email" });
     }
 
-    // Generate new OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    otpStore.set(email, {
+      ...storedData,
+      otp,
+      expires: Date.now() + 10 * 60 * 1000,
+    });
 
-    // Update OTP store
-    otpStore.set(email, { ...storedData, otp, expires: Date.now() + 10 * 60 * 1000 });
-
-    // Send new OTP email
     await sendOTPEmail({ email, Fullname: storedData.Fullname, otp });
 
     return res.status(200).json({ success: true, message: "New OTP sent successfully" });
@@ -198,7 +208,6 @@ export const loginuser = async (req, res) => {
     }
 
     const { email, password } = req.body;
-
     const user = await userModel.findByEmail(email);
     if (!user) {
       return res.status(400).json({ success: false, message: "Invalid email or password" });
@@ -211,12 +220,13 @@ export const loginuser = async (req, res) => {
 
     const token = generateToken(user);
 
-  res.cookie("token", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production", // true when deployed
-  sameSite: "None", // <-- must be "None" for cross-site
-  maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
-});
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // true in production (HTTPS)
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // Use "Lax" for local dev
+      maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
+      path: "/", // Ensure cookie is available for all routes
+    });
 
     return res.status(200).json({
       success: true,
@@ -242,11 +252,11 @@ export const logout = (req, res) => {
   try {
     res.cookie("token", "", {
       httpOnly: true,
-      expires: new Date(0),
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      expires: new Date(0),
+      path: "/",
     });
-
     return res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (err) {
     console.error("Logout error:", err);
@@ -258,7 +268,6 @@ export const logout = (req, res) => {
 export const getProfile = async (req, res) => {
   try {
     const user = req.user; // From authMiddleware
-
     return res.status(200).json({
       success: true,
       user: {
