@@ -1,313 +1,152 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, CheckCircle, AlertTriangle, Menu, X, ArrowLeft } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion'; 
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import  FloatingButton  from '../components/FloatingButton';
-import Skeleton from 'react-loading-skeleton';
+import React, { useState, useEffect } from "react";
+import { Menu, X, ArrowLeft, Sparkles, User, Mail, RefreshCw, LogOut } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import FloatingButton from "../components/FloatingButton";
+import RoadmapTracker from "../components/RoadmapTracker";
 
-
-const messageVariants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    scale: 1,
-    transition: { 
-      duration: 0.6, 
-      ease: [0.25, 0.46, 0.45, 0.94],
-      type: "spring",
-      stiffness: 100
-    } 
-  },
-  exit: { 
-    opacity: 0, 
-    y: -20, 
-    scale: 0.95,
-    transition: { duration: 0.3 }
-  }
-};
-
-const sidebarVariants = {
-  hidden: { x: '-100%', opacity: 0 },
-  visible: { 
-    x: 0, 
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 20,
-      duration: 0.5
-    }
-  }
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2
-    }
-  }
-};
-
-const staggerItem = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94]
-    }
-  }
-};
-
-const AnimatedBackground = () => {
-  return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none">
-      {/* Gradient Orbs */}
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-teal-400/20 via-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-blue-400/15 via-teal-400/15 to-green-400/15 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-r from-purple-400/10 via-pink-400/10 to-teal-400/10 rounded-full blur-2xl animate-spin-slow"></div>
-      
-      {/* Floating Particles */}
-      {[...Array(20)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 bg-teal-400/30 rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [-20, -100, -20],
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0]
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 2
-          }}
-        />
-      ))}
-      
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-    </div>
-  );
-};
+const AnimatedBackground = () => (
+  <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+    {/* Rich Gradient Background */}
+    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-900 to-rose-950 animate-gradient-shift"></div>
+    
+    {/* Floating Orbs */}
+    <motion.div
+      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/15 to-blue-500/15 rounded-full blur-[140px]"
+      animate={{
+        scale: [1, 1.2, 1],
+        x: [0, 60, 0],
+        y: [0, 40, 0],
+      }}
+      transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+    />
+    <motion.div
+      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/15 to-fuchsia-500/15 rounded-full blur-[140px]"
+      animate={{
+        scale: [1, 1.3, 1],
+        x: [0, -60, 0],
+        y: [0, -40, 0],
+      }}
+      transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+    />
+    <motion.div
+      className="absolute top-1/2 left-1/2 w-[500px] h-[500px] bg-gradient-to-br from-amber-400/10 to-orange-500/10 rounded-full blur-[140px]"
+      animate={{
+        scale: [1, 1.15, 1],
+        rotate: [0, 180, 360],
+      }}
+      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+    />
+    
+    {/* Mesh Grid */}
+    <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]"></div>
+    
+    {/* Animated Particles */}
+    {[...Array(25)].map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute w-1 h-1 bg-white/20 rounded-full"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+        }}
+        animate={{
+          y: [0, -40, 0],
+          opacity: [0.2, 0.7, 0.2],
+        }}
+        transition={{
+          duration: 3 + Math.random() * 2,
+          repeat: Infinity,
+          delay: Math.random() * 2,
+        }}
+      />
+    ))}
+  </div>
+);
 
 const StatusIndicator = ({ status }) => (
   <motion.div 
-    className="flex items-center gap-2"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
+    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg" 
+    initial={{ opacity: 0, scale: 0.8 }} 
+    animate={{ opacity: 1, scale: 1 }} 
     transition={{ duration: 0.5 }}
   >
     <motion.span
-      className={`w-2 h-2 rounded-full ${
-        status === 'online' ? 'bg-green-400' : 'bg-red-400'
-      }`}
-      animate={{
-        scale: status === 'online' ? [1, 1.2, 1] : 1,
-        opacity: status === 'checking' ? [1, 0.5, 1] : 1
+      className={`w-2.5 h-2.5 rounded-full ${
+        status === "online" ? "bg-emerald-400" : 
+        status === "offline" ? "bg-rose-400" : 
+        "bg-amber-400"
+      } shadow-lg`}
+      animate={{ 
+        scale: status === "online" ? [1, 1.4, 1] : 
+               status === "checking" ? [1, 1.3, 1] : 1,
+        boxShadow: status === "online" ? [
+          "0 0 0 0 rgba(52, 211, 153, 0.7)",
+          "0 0 0 10px rgba(52, 211, 153, 0)",
+          "0 0 0 0 rgba(52, 211, 153, 0)"
+        ] : []
       }}
-      transition={{
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
+      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
     />
-    <span className="text-xs md:text-sm">
-      {status === 'online' ? 'Online' : status === 'offline' ? 'Offline' : 'Checking...'}
+    <span className="text-xs font-semibold text-white">
+      {status === "online" ? "Online" : status === "offline" ? "Offline" : "Checking..."}
     </span>
   </motion.div>
 );
 
 export default function Dashboard() {
-  const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([]);
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [backendStatus, setBackendStatus] = useState("checking");
-  const [showHistory, setShowHistory] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const messagesEndRef = useRef(null);
+  const [backendStatus, setBackendStatus] = useState("checking");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
 
-  // Scroll to latest message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Initialize on mount
   useEffect(() => {
     const init = async () => {
-      setLoading(true);
       await checkBackendStatus();
       await fetchUserData();
-      setLoading(false);
     };
     init();
   }, []);
 
-  // Fetch history and report when user and backendStatus are ready
-  useEffect(() => {
-    if (user && backendStatus === 'online') {
-      fetchHistory();
-      fetchReport();
-    }
-  }, [user, backendStatus]);
-
-  // Check if backend is online
   const checkBackendStatus = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/health`, { timeout: 5000 });
-      setBackendStatus(response.status === 200 ? 'online' : 'offline');
-      return response.status === 200;
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/health`, { timeout: 5000 });
+      setBackendStatus(response.status === 200 ? "online" : "offline");
     } catch (err) {
-      console.error('Backend check failed:', err.message);
-      setBackendStatus('offline');
-      return false;
+      console.error("Backend check failed:", err.message);
+      setBackendStatus("offline");
     }
   };
 
-  // Fetch user data
   const fetchUserData = async () => {
+    setIsRefreshing(true);
     try {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, { withCredentials: true });
       setUser(response.data.user);
     } catch (err) {
-      console.error('User fetch error:', err.response?.data || err.message);
-    }
-  };
-
-  // Fetch user history
-  const fetchHistory = async () => {
-    if (!user) return;
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/api/analyses?userId=${user.id}`, { withCredentials: true });
-      if (response.data.success) {
-        setHistory(response.data.data);
-      }
-    } catch (err) {
-      console.error('History fetch error:', err.response?.data || err.message);
-    }
-  };
-
-  // Fetch initial report
-  const fetchReport = async () => {
-    if (!user || backendStatus !== 'online') return;
-    setLoading(true);
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/api/ai-report?userId=${user.id}`, { withCredentials: true });
-      const result = response.data;
-
-      const botMessage = {
-        sender: 'AI',
-        text: result.analysis || result.error || 'No analysis available',
-        meta: {
-          type: result.type || 'unknown',
-          confidence: result.confidence || 'N/A',
-          source: result.source || 'AI',
-          timestamp: result.timestamp || new Date().toISOString(),
-        },
-      };
-
-      setMessages([botMessage]);
-    } catch (err) {
-      console.error('Report fetch error:', err.response?.data || err.message);
-      setMessages([
-        {
-          sender: 'AI',
-          text: `❌ Failed to load mental health report: ${err.response?.data?.error || err.message}`,
-          meta: null,
-        },
-      ]);
+      console.error("User fetch error:", err.response?.data || err.message);
+      navigate("/signin");
     } finally {
-      setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
-  // Send user input to backend
-  const analyzeData = async () => {
-    if (!input.trim() || !user) return;
-
-    setLoading(true);
-    const userMessage = { sender: 'User', text: input };
-    setMessages((prev) => [...prev, userMessage]);
-
-    try {
-      const online = await checkBackendStatus();
-      if (!online) {
-        throw new Error('Server is offline. Please try again later.');
-      }
-
-      const response = await axios.post(
-        `${import.meta.env.VITE_AI_BACKEND_URL}/api/ai-chat`,
-        { message: input, userId: user.id },
-        { withCredentials: true }
-      );
-      const result = response.data;
-
-      const botMessage = {
-        sender: 'AI',
-        text: result.response || result.error || 'No response available',
-        meta: {
-          type: result.type || 'unknown',
-          confidence: result.confidence || 'N/A',
-          source: result.source || 'AI',
-          timestamp: result.timestamp || new Date().toISOString(),
-        },
-      };
-
-      setMessages((prev) => [...prev, botMessage]);
-      fetchHistory(); // Refresh history
-    } catch (err) {
-      console.error('Chat error:', err.response?.data || err.message);
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: 'AI',
-          text: `❌ Failed to get response from AI: ${err.response?.data?.error || err.message}`,
-          meta: null,
-        },
-      ]);
-    } finally {
-      setInput('');
-      setLoading(false);
-    }
-  };
-
-  // Handle Enter key press
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      analyzeData();
-    }
-  };
-
-  // Close sidebar on mobile overlay click
-  const handleOverlayClick = () => {
-    setSidebarOpen(false);
+  const handleLogout = () => {
+    window.location.href = "/signin";
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-teal-50/50 text-gray-800 relative overflow-hidden">
+    <div className="flex min-h-screen bg-slate-950 text-white relative overflow-hidden">
       <AnimatedBackground />
       
       {/* Mobile Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
-          <motion.div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
-            onClick={handleOverlayClick}
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+            onClick={() => setSidebarOpen(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -318,504 +157,281 @@ export default function Dashboard() {
 
       {/* Sidebar */}
       <motion.aside
-        className={`
-        fixed md:fixed z-50 md:z-auto
-        w-80 md:w-64 h-full md:h-screen
-        top-0 left-0
-        bg-white/80 backdrop-blur-xl border-r border-white/20 shadow-2xl
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-        flex flex-col transition-transform duration-300 ease-in-out
-      `}
-        variants={sidebarVariants}
-        initial="hidden"
-        animate={sidebarOpen || window.innerWidth >= 768 ? "visible" : "hidden"}
+        className="fixed top-0 left-0 z-50 w-80 md:w-80 h-screen bg-gradient-to-br from-white/[0.12] to-white/[0.05] backdrop-blur-2xl border-r border-white/20 shadow-2xl flex flex-col"
+        initial={{ x: "-100%" }}
+        animate={{ 
+          x: sidebarOpen || window.innerWidth >= 768 ? 0 : "-100%"
+        }}
+        transition={{ type: "spring", stiffness: 120, damping: 20 }}
       >
-        <motion.div 
-          className="flex justify-between items-center p-4 md:hidden"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <motion.h2 
-            className="text-lg font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-            whileHover={{ scale: 1.05 }}
+        {/* Sidebar Header */}
+        <div className="flex justify-between items-center p-6 border-b border-white/10">
+          <motion.h2
+            className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent"
+            animate={{
+              backgroundPosition: ["0%", "100%", "0%"],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+            style={{ backgroundSize: "200% auto" }}
           >
-            HelloMind AI
+            PathForge
           </motion.h2>
-          <motion.button 
-            onClick={() => setSidebarOpen(false)} 
-            className="p-2 hover:bg-teal-100/50 rounded-lg transition-colors"
-            whileHover={{ scale: 1.1 }}
+          <motion.button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden p-2 hover:bg-white/10 rounded-xl transition-colors"
+            whileHover={{ scale: 1.1, rotate: 90 }}
             whileTap={{ scale: 0.95 }}
           >
-            <X size={20} />
+            <X size={24} className="text-white" />
           </motion.button>
-        </motion.div>
-
-        <div className="flex-1 p-4 md:p-6">
-          {user && (
-            <motion.div 
-              className="flex flex-col items-center gap-3 mb-6 md:mb-10"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-            >
-              <motion.div 
-                className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-teal-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xl shadow-lg"
-                variants={staggerItem}
-                whileHover={{ scale: 1.1, rotate: 360 }}
-                transition={{ type: "spring", stiffness: 200 }}
-              >
-                {user.Fullname?.[0] || 'U'}
-              </motion.div>
-              <motion.div className="text-center" variants={staggerItem}>
-                <p className="font-bold text-sm md:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {user.Fullname || 'User'}
-                </p>
-                <p className="text-xs md:text-sm text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
-                  {user.email || 'user@example.com'}
-                </p>
-              </motion.div>
-            </motion.div>
-          )}
-
-          <motion.div 
-            className="text-xs md:text-sm mb-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <StatusIndicator status={backendStatus} />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <FloatingButton
-              onClick={() => {
-                setMessages([]);
-                setSidebarOpen(false);
-              }}
-              className="w-full mb-4 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 transform hover:scale-105 transition-all duration-200"
-            >
-              ✨ New Chat
-            </FloatingButton>
-          </motion.div>
-
-          <motion.button
-            onClick={() => setShowHistory(!showHistory)}
-            className="w-full px-4 py-2 bg-white/50 hover:bg-white/70 backdrop-blur-sm rounded-lg text-sm text-gray-800 disabled:opacity-50 transition-all duration-200 border border-white/20 hover:border-white/30"
-            disabled={history.length === 0}
-            style={{ fontFamily: 'Inter, sans-serif' }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            {showHistory ? '📋 Hide History' : '📋 Show History'}
-          </motion.button>
-
-          <AnimatePresence>
-            {showHistory && (
-              <motion.div
-                className="max-h-60 md:max-h-96 overflow-y-auto space-y-2 mt-2"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {history.length === 0 && (
-                  <motion.p 
-                    className="text-gray-500 text-xs md:text-sm" 
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    No history available.
-                  </motion.p>
-                )}
-                {history.map((item, i) => (
-                  <motion.div
-                    key={i}
-                    className="p-3 bg-white/30 hover:bg-white/50 backdrop-blur-sm rounded-lg text-xs md:text-sm cursor-pointer transition-all duration-200 border border-white/20"
-                    onClick={() => {
-                      setMessages([
-                        { sender: 'User', text: item.userInput.text },
-                        { sender: 'AI', text: item.aiResponse.response, meta: item.aiResponse },
-                      ]);
-                      setSidebarOpen(false);
-                    }}
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    whileHover={{ scale: 1.02, x: 5 }}
-                  >
-                    <p className="truncate">
-                      <strong>Input:</strong> {item.userInput.text.slice(0, 50)}...
-                    </p>
-                    <p className="truncate">
-                      <strong>Response:</strong> {item.aiResponse.response.slice(0, 50)}...
-                    </p>
-                    <p className="text-gray-500">
-                      <strong>Date:</strong> {new Date(item.timestamp).toLocaleDateString()}
-                    </p>
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
-        <motion.div 
-          className="p-4 md:p-6 border-t border-white/20"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <motion.div className="mb-3 hidden md:block">
-            <motion.button 
-              onClick={() => navigate('/Features')} 
-              className="flex items-center gap-2 w-full px-4 py-2 bg-white/50 hover:bg-white/70 backdrop-blur-sm rounded-lg text-sm text-gray-800 transition-all duration-200 border border-white/20 hover:border-white/30"
-              whileHover={{ scale: 1.02, x: -2 }}
-              whileTap={{ scale: 0.98 }}
-              style={{ fontFamily: 'Inter, sans-serif' }}
+        {/* User Profile Section */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          {user && (
+            <motion.div
+              className="mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              <ArrowLeft size={16} />
-              Back to Features
-            </motion.button>
-          </motion.div>
-          <FloatingButton
-            onClick={() => (window.location.href = '/signin')}
-            className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transform hover:scale-105 transition-all duration-200"
+              {/* Avatar */}
+              <div className="flex flex-col items-center gap-4 mb-6">
+                <motion.div
+                  className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-cyan-500 via-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-3xl font-bold shadow-2xl"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                >
+                  {user.Fullname?.[0]?.toUpperCase() || "U"}
+                  {/* Sparkle Effect */}
+                  <motion.div
+                    className="absolute -top-1 -right-1 text-amber-300"
+                    animate={{
+                      rotate: [0, 360],
+                      scale: [1, 1.3, 1],
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Sparkles size={20} />
+                  </motion.div>
+                </motion.div>
+
+                {/* User Info */}
+                <div className="text-center w-full">
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    {user.Fullname || "User"}
+                  </h3>
+                  <div className="flex items-center justify-center gap-2 text-gray-300 text-sm">
+                    <Mail className="w-3.5 h-3.5" />
+                    <p className="truncate max-w-[200px]">{user.email || "user@example.com"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Card */}
+              <div className="p-4 bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-gray-300">Backend Status</span>
+                  <StatusIndicator status={backendStatus} />
+                </div>
+                <motion.button
+                  onClick={checkBackendStatus}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm text-white transition-all duration-300 border border-white/10"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Check Status
+                </motion.button>
+              </div>
+
+              {/* Refresh Profile Button */}
+              <motion.button
+                onClick={fetchUserData}
+                disabled={isRefreshing}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {isRefreshing ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </motion.div>
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh Profile
+                  </>
+                )}
+              </motion.button>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Sidebar Footer */}
+        <div className="p-6 border-t border-white/10 space-y-3">
+          <motion.button
+            onClick={() => navigate("/features")}
+            className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-xl text-sm text-white font-semibold shadow-lg transition-all duration-300 border border-white/20"
+            whileHover={{ scale: 1.02, x: -5 }}
+            whileTap={{ scale: 0.98 }}
           >
-            🚪 Logout
-          </FloatingButton>
-        </motion.div>
+            <ArrowLeft className="w-4 h-4" />
+            Back to Features
+          </motion.button>
+          
+          <motion.button
+            onClick={handleLogout}
+            className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-xl font-semibold shadow-lg transition-all duration-300"
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </motion.button>
+        </div>
       </motion.aside>
 
-      <main className="flex-1 flex flex-col min-w-0 relative z-10 md:ml-64">
-        <motion.header 
-          className="md:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-xl border-b border-white/20"
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-w-0 ml-0 md:ml-80 relative z-10">
+        {/* Mobile Header */}
+        <motion.header
+          className="md:hidden flex items-center justify-between p-4 bg-white/[0.08] backdrop-blur-2xl border-b border-white/10 shadow-xl"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
           <div className="flex items-center gap-2">
-            <motion.button 
-              onClick={() => navigate('/feature')} 
-              className="p-2 hover:bg-teal-100/50 rounded-lg transition-colors"
-              whileHover={{ scale: 1.1, x: -2 }}
+            <motion.button
+              onClick={() => navigate("/features")}
+              className="p-2 hover:bg-white/10 rounded-xl transition-colors"
+              whileHover={{ scale: 1.1, x: -3 }}
               whileTap={{ scale: 0.95 }}
-              title="Back to Features"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={24} className="text-white" />
             </motion.button>
-            <motion.button 
-              onClick={() => setSidebarOpen(true)} 
-              className="p-2 hover:bg-teal-100/50 rounded-lg transition-colors"
+            <motion.button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-white/10 rounded-xl transition-colors"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Menu size={24} />
+              <Menu size={24} className="text-white" />
             </motion.button>
           </div>
-          <motion.h1 
-            className="text-lg font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent"
-            style={{ fontFamily: 'Inter, sans-serif' }}
-            whileHover={{ scale: 1.05 }}
+          
+          <motion.h1
+            className="text-xl font-bold bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent"
+            animate={{
+              backgroundPosition: ["0%", "100%", "0%"],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+            style={{ backgroundSize: "200% auto" }}
           >
-            HelloMind AI
+            PathForge
           </motion.h1>
+          
           <StatusIndicator status={backendStatus} />
         </motion.header>
 
-        <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 pb-20 md:pb-24">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-8">
           <AnimatePresence mode="wait">
-            {messages.length === 0 && (
-              <motion.div 
-                className="text-center text-gray-600 mt-8 md:mt-20 px-4"
+            {!user && (
+              <motion.div
+                className="flex flex-col items-center justify-center mt-12 md:mt-24 px-4 text-center max-w-2xl mx-auto"
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className="max-w-md mx-auto">
+                <div className="relative bg-gradient-to-br from-white/[0.12] to-white/[0.05] backdrop-blur-xl rounded-3xl p-12 shadow-2xl border border-white/20">
+                  {/* Shine Effect */}
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 200, 
-                      damping: 20,
-                      delay: 0.2 
-                    }}
-                  >
-                    <h2 className="text-xl md:text-2xl font-bold mb-4 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      👋 Welcome to HelloMind AI
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-3xl"
+                    animate={{ x: ["-100%", "100%"] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                  />
+                  
+                  {/* Content */}
+                  <div className="relative z-10">
+                    <motion.div
+                      className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500 to-violet-500 flex items-center justify-center shadow-2xl"
+                      animate={{
+                        rotate: [0, 360],
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    >
+                      <User className="w-10 h-10 text-white" />
+                    </motion.div>
+                    
+                    <h2 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">
+                      Welcome to PathForge
                     </h2>
-                  </motion.div>
-                  <motion.p 
-                    className="text-sm md:text-base mb-4" 
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    Share how you're feeling to get personalized mental health support.
-                  </motion.p>
-                  <motion.div 
-                    className="text-xs md:text-sm" 
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <StatusIndicator status={backendStatus} />
-                  </motion.div>
+                    <p className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
+                      Sign in to unlock your personalized career roadmap and start your journey to success!
+                    </p>
+                    <motion.button
+                      onClick={() => navigate("/signin")}
+                      className="px-8 py-4 bg-gradient-to-r from-violet-500 to-fuchsia-600 hover:from-violet-600 hover:to-fuchsia-700 text-white rounded-xl font-bold text-lg shadow-2xl hover:shadow-violet-500/50 transition-all duration-300"
+                      whileHover={{ scale: 1.05, y: -3 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Sign In Now
+                    </motion.button>
+                  </div>
                 </div>
+              </motion.div>
+            )}
+            
+            {user && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <RoadmapTracker user={user} />
               </motion.div>
             )}
           </AnimatePresence>
-
-          <div className="space-y-4 md:space-y-6 max-w-4xl mx-auto">
-            <AnimatePresence>
-              {messages.map((msg, i) => (
-                <motion.div
-                  key={i}
-                  className={`flex ${msg.sender === 'User' ? 'justify-end' : 'justify-start'}`}
-                  variants={messageVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  layout
-                >
-                  {msg.sender === 'AI' ? (
-                    <motion.div 
-                      className="w-full max-w-none md:max-w-3xl bg-white/80 backdrop-blur-xl p-4 md:p-5 rounded-2xl shadow-lg border border-white/20"
-                      whileHover={{ scale: 1.01 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <motion.div 
-                        className="flex items-center gap-2 mb-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <motion.div 
-                          className="w-6 h-6 bg-gradient-to-br from-teal-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xs"
-                          animate={{ rotate: [0, 360] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        >
-                          🧠
-                        </motion.div>
-                        <h3 className="text-sm md:text-lg font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent" style={{ fontFamily: 'Inter, sans-serif' }}>
-                          HelloMind AI
-                        </h3>
-                      </motion.div>
-                      <motion.div 
-                        className="text-sm md:text-base leading-relaxed whitespace-pre-line" 
-                        style={{ fontFamily: 'Inter, sans-serif' }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                      >
-                        {msg.text}
-                      </motion.div>
-                      {msg.meta && (
-                        <motion.div 
-                          className="mt-3 p-3 bg-gradient-to-r from-teal-50/50 to-blue-50/50 backdrop-blur-sm rounded-lg text-xs border border-white/20"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.6 }}
-                        >
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                            <div>🧠 <strong>Type:</strong> {msg.meta.type}</div>
-                            <div>🌟 <strong>Confidence:</strong> {msg.meta.confidence}</div>
-                            <div>📂 <strong>Source:</strong> {msg.meta.source}</div>
-                          </div>
-                        </motion.div>
-                      )}
-                      <motion.div 
-                        className="mt-4 p-3 rounded-xl bg-gradient-to-r from-yellow-50/50 to-orange-50/50 backdrop-blur-sm text-xs border border-yellow-200/50"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.8 }}
-                      >
-                        ⚠️ <strong>Disclaimer:</strong> This is AI-generated advice. Always consult a mental health professional for personalized care.
-                      </motion.div>
-                    </motion.div>
-                  ) : (
-                    <motion.div 
-                      className="max-w-xs md:max-w-lg p-3 md:p-4 rounded-2xl shadow-md bg-gradient-to-br from-blue-500 to-teal-500 text-white rounded-br-none"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <p className="text-sm md:text-base whitespace-pre-line" style={{ fontFamily: 'Inter, sans-serif' }}>
-                        {msg.text}
-                      </p>
-                    </motion.div>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            
-            {loading && (
-              <motion.div 
-                className="flex justify-start max-w-4xl mx-auto"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div className="w-full max-w-3xl bg-white/80 backdrop-blur-xl p-4 md:p-5 rounded-2xl shadow-lg border border-white/20">
-                  <motion.div
-                    animate={{ opacity: [1, 0.5, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    <Skeleton count={3} height={20} className="rounded-lg mb-2" />
-                  </motion.div>
-                </div>
-              </motion.div>
-            )}
-          </div>
-          <div ref={messagesEndRef} />
         </div>
-
-        <motion.div 
-          className="fixed bottom-0 left-0 right-0 md:left-64 border-t border-white/20 bg-white/80 backdrop-blur-xl p-4 md:p-6 z-20"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-end gap-2 md:gap-3">
-              <motion.textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="How are you feeling today?"
-                rows="1"
-                className="flex-1 px-4 py-3 bg-white/50 backdrop-blur-sm rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-400 border border-white/30 transition-all resize-none text-sm md:text-base hover:bg-white/70 focus:bg-white/80 overflow-hidden"
-                style={{
-                  fontFamily: 'Inter, sans-serif',
-                  minHeight: '48px',
-                  maxHeight: '120px',
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none'
-                }}
-                onInput={(e) => {
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
-                }}
-                disabled={backendStatus === 'offline' || !user}
-                whileFocus={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              />
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <FloatingButton 
-                  onClick={analyzeData} 
-                  disabled={loading || !input.trim() || !user}
-                  className="bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 disabled:from-gray-400 disabled:to-gray-500"
-                >
-                  {loading ? (
-                    <motion.div 
-                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
-                  ) : (
-                    <motion.div
-                      whileHover={{ x: 2 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                    >
-                      <Send size={20} />
-                    </motion.div>
-                  )}
-                </FloatingButton>
-              </motion.div>
-            </div>
-            <motion.div 
-              className="mt-2 text-xs text-gray-500 text-center md:hidden" 
-              style={{ fontFamily: 'Inter, sans-serif' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              Press Enter to send
-            </motion.div>
-          </div>
-        </motion.div>
       </main>
-      
-      <style>{`
-        @keyframes floatDot {
-          0% { transform: translateY(0); opacity: 0.3; }
-          50% { transform: translateY(-30px); opacity: 0.5; }
-          100% { transform: translateY(-60px); opacity: 0; }
+
+      <style jsx>{`
+        @keyframes gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
         }
-        
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        .animate-gradient-shift {
+          background-size: 200% 200%;
+          animation: gradient-shift 15s ease infinite;
         }
-        
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
-        }
-        
         .bg-grid-pattern {
           background-image: 
-            linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
           background-size: 50px 50px;
         }
-        
-        /* Hide scrollbars for textarea */
-        textarea::-webkit-scrollbar {
-          display: none;
-        }
-        
-        textarea {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        
-        /* Enhanced scrollbar styling for main content */
         ::-webkit-scrollbar {
-          width: 8px;
+          width: 10px;
         }
-        
         ::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 5px;
         }
-        
         ::-webkit-scrollbar-thumb {
-          background: linear-gradient(to bottom, #14b8a6, #3b82f6);
-          border-radius: 4px;
+          background: linear-gradient(to bottom, #06b6d4, #8b5cf6);
+          border-radius: 5px;
         }
-        
         ::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(to bottom, #0d9488, #2563eb);
-        }
-        
-        /* Glassmorphism effects */
-        .backdrop-blur-xl {
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-        }
-        
-        /* Smooth transitions for all interactive elements */
-        * {
-          transition-property: color, background-color, border-color, transform, filter, backdrop-filter;
-          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-          transition-duration: 150ms;
+          background: linear-gradient(to bottom, #0891b2, #7c3aed);
         }
       `}</style>
     </div>
