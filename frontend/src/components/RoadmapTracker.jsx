@@ -40,7 +40,7 @@ const RoadmapTracker = ({ user }) => {
         `${VITE_AI_BACKEND_URL}/api/progress/api/roadmap/${user.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          timeout: 10000,
+          timeout: 30000,
         }
       );
       
@@ -86,7 +86,7 @@ const RoadmapTracker = ({ user }) => {
         { user_id: user.id },
         {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          timeout: 60000,
+          timeout: 120000,
         }
       );
       
