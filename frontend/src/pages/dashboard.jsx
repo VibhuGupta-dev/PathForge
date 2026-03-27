@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, ArrowLeft, Sparkles, User, Mail, RefreshCw, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  ArrowLeft,
+  Sparkles,
+  User,
+  Mail,
+  RefreshCw,
+  LogOut,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -9,11 +18,11 @@ import RoadmapTracker from "../components/RoadmapTracker";
 const AnimatedBackground = () => (
   <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     {/* Rich Gradient Background */}
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-900 to-rose-950 animate-gradient-shift"></div>
-    
+    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-rose-50 dark:from-indigo-950 dark:via-purple-900 dark:to-rose-950 animate-gradient-shift"></div>
+
     {/* Floating Orbs */}
     <motion.div
-      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/15 to-blue-500/15 rounded-full blur-[140px]"
+      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-[140px]"
       animate={{
         scale: [1, 1.2, 1],
         x: [0, 60, 0],
@@ -22,7 +31,7 @@ const AnimatedBackground = () => (
       transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
     />
     <motion.div
-      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/15 to-fuchsia-500/15 rounded-full blur-[140px]"
+      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rounded-full blur-[140px]"
       animate={{
         scale: [1, 1.3, 1],
         x: [0, -60, 0],
@@ -38,15 +47,15 @@ const AnimatedBackground = () => (
       }}
       transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
     />
-    
+
     {/* Mesh Grid */}
     <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]"></div>
-    
+
     {/* Animated Particles */}
     {[...Array(25)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-1 h-1 bg-white/20 rounded-full"
+        className="absolute w-1 h-1 bg-indigo-900/10 dark:bg-white/20 rounded-full"
         style={{
           left: `${Math.random() * 100}%`,
           top: `${Math.random() * 100}%`,
@@ -66,31 +75,44 @@ const AnimatedBackground = () => (
 );
 
 const StatusIndicator = ({ status }) => (
-  <motion.div 
-    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg" 
-    initial={{ opacity: 0, scale: 0.8 }} 
-    animate={{ opacity: 1, scale: 1 }} 
+  <motion.div
+    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg"
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.5 }}
   >
     <motion.span
       className={`w-2.5 h-2.5 rounded-full ${
-        status === "online" ? "bg-emerald-400" : 
-        status === "offline" ? "bg-rose-400" : 
-        "bg-amber-400"
+        status === "online"
+          ? "bg-emerald-400"
+          : status === "offline"
+          ? "bg-rose-400"
+          : "bg-amber-400"
       } shadow-lg`}
-      animate={{ 
-        scale: status === "online" ? [1, 1.4, 1] : 
-               status === "checking" ? [1, 1.3, 1] : 1,
-        boxShadow: status === "online" ? [
-          "0 0 0 0 rgba(52, 211, 153, 0.7)",
-          "0 0 0 10px rgba(52, 211, 153, 0)",
-          "0 0 0 0 rgba(52, 211, 153, 0)"
-        ] : []
+      animate={{
+        scale:
+          status === "online"
+            ? [1, 1.4, 1]
+            : status === "checking"
+            ? [1, 1.3, 1]
+            : 1,
+        boxShadow:
+          status === "online"
+            ? [
+                "0 0 0 0 rgba(52, 211, 153, 0.7)",
+                "0 0 0 10px rgba(52, 211, 153, 0)",
+                "0 0 0 0 rgba(52, 211, 153, 0)",
+              ]
+            : [],
       }}
       transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
     />
     <span className="text-xs font-semibold text-white">
-      {status === "online" ? "Online" : status === "offline" ? "Offline" : "Checking..."}
+      {status === "online"
+        ? "Online"
+        : status === "offline"
+        ? "Offline"
+        : "Checking..."}
     </span>
   </motion.div>
 );
@@ -112,7 +134,10 @@ export default function Dashboard() {
 
   const checkBackendStatus = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/health`, { timeout: 5000 });
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/health`,
+        { timeout: 5000 }
+      );
       setBackendStatus(response.status === 200 ? "online" : "offline");
     } catch (err) {
       console.error("Backend check failed:", err.message);
@@ -123,7 +148,10 @@ export default function Dashboard() {
   const fetchUserData = async () => {
     setIsRefreshing(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, { withCredentials: true });
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/me`,
+        { withCredentials: true }
+      );
       setUser(response.data.user);
     } catch (err) {
       console.error("User fetch error:", err.response?.data || err.message);
@@ -138,9 +166,9 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-white relative overflow-hidden">
+    <div className="flex min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-white relative overflow-hidden">
       <AnimatedBackground />
-      
+
       {/* Mobile Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -159,8 +187,8 @@ export default function Dashboard() {
       <motion.aside
         className="fixed top-0 left-0 z-50 w-80 md:w-80 h-screen bg-gradient-to-br from-white/[0.12] to-white/[0.05] backdrop-blur-2xl border-r border-white/20 shadow-2xl flex flex-col"
         initial={{ x: "-100%" }}
-        animate={{ 
-          x: sidebarOpen || window.innerWidth >= 768 ? 0 : "-100%"
+        animate={{
+          x: sidebarOpen || window.innerWidth >= 768 ? 0 : "-100%",
         }}
         transition={{ type: "spring", stiffness: 120, damping: 20 }}
       >
@@ -223,7 +251,9 @@ export default function Dashboard() {
                   </h3>
                   <div className="flex items-center justify-center gap-2 text-gray-300 text-sm">
                     <Mail className="w-3.5 h-3.5" />
-                    <p className="truncate max-w-[200px]">{user.email || "user@example.com"}</p>
+                    <p className="truncate max-w-[200px]">
+                      {user.email || "user@example.com"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -257,7 +287,11 @@ export default function Dashboard() {
                   <>
                     <motion.div
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
                     >
                       <RefreshCw className="w-4 h-4" />
                     </motion.div>
@@ -285,7 +319,7 @@ export default function Dashboard() {
             <ArrowLeft className="w-4 h-4" />
             Back to Features
           </motion.button>
-          
+
           <motion.button
             onClick={handleLogout}
             className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-xl font-semibold shadow-lg transition-all duration-300"
@@ -325,7 +359,7 @@ export default function Dashboard() {
               <Menu size={24} className="text-white" />
             </motion.button>
           </div>
-          
+
           <motion.h1
             className="text-xl font-bold bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent"
             animate={{
@@ -336,7 +370,7 @@ export default function Dashboard() {
           >
             PathForge
           </motion.h1>
-          
+
           <StatusIndicator status={backendStatus} />
         </motion.header>
 
@@ -356,9 +390,13 @@ export default function Dashboard() {
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-3xl"
                     animate={{ x: ["-100%", "100%"] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 1,
+                    }}
                   />
-                  
+
                   {/* Content */}
                   <div className="relative z-10">
                     <motion.div
@@ -371,12 +409,13 @@ export default function Dashboard() {
                     >
                       <User className="w-10 h-10 text-white" />
                     </motion.div>
-                    
+
                     <h2 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-cyan-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">
                       Welcome to PathForge
                     </h2>
                     <p className="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
-                      Sign in to unlock your personalized career roadmap and start your journey to success!
+                      Sign in to unlock your personalized career roadmap and
+                      start your journey to success!
                     </p>
                     <motion.button
                       onClick={() => navigate("/signin")}
@@ -390,7 +429,7 @@ export default function Dashboard() {
                 </div>
               </motion.div>
             )}
-            
+
             {user && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -406,17 +445,28 @@ export default function Dashboard() {
 
       <style jsx>{`
         @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
         }
         .animate-gradient-shift {
           background-size: 200% 200%;
           animation: gradient-shift 15s ease infinite;
         }
         .bg-grid-pattern {
-          background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+          background-image: linear-gradient(
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            );
           background-size: 50px 50px;
         }
         ::-webkit-scrollbar {

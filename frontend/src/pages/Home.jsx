@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 const AnimatedBackground = () => (
   <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-900 to-rose-950 animate-gradient-shift"></div>
-    
+    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-rose-50 dark:from-indigo-950 dark:via-purple-900 dark:to-rose-950 animate-gradient-shift"></div>
+
     <motion.div
       className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-[150px]"
       animate={{
@@ -34,13 +34,13 @@ const AnimatedBackground = () => (
       }}
       transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
     />
-    
+
     <div className="absolute inset-0 bg-grid-pattern opacity-[0.08]"></div>
-    
+
     {[...Array(30)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-1.5 h-1.5 bg-white/30 rounded-full"
+        className="absolute w-1.5 h-1.5 bg-indigo-900/10 dark:bg-white/30 rounded-full"
         style={{
           left: `${Math.random() * 100}%`,
           top: `${Math.random() * 100}%`,
@@ -68,35 +68,55 @@ export default function Landing() {
   const blocks = [
     {
       query: "Need guidance to be a web developer",
-      response: "Start with HTML, CSS, and JavaScript. Build small static pages to understand structure, styling, and interactivity. Master responsive design with Flexbox and Grid. Consider Tailwind CSS for fast, utility-based styling...",
+      response:
+        "Start with HTML, CSS, and JavaScript. Build small static pages to understand structure, styling, and interactivity. Master responsive design with Flexbox and Grid. Consider Tailwind CSS for fast, utility-based styling...",
       icon: "💻",
-      gradient: "from-cyan-500 to-blue-600"
+      gradient: "from-cyan-500 to-blue-600",
     },
     {
       query: "Want to be a doctor",
-      response: "NCERT First! Biology: Learn NCERT line by line, every diagram, every example. 70% of NEET Bio is straight from NCERT. Chemistry: Focus on NCERT for Inorganic & Physical basics. Physics: NCERT + strong problem-solving practice...",
+      response:
+        "NCERT First! Biology: Learn NCERT line by line, every diagram, every example. 70% of NEET Bio is straight from NCERT. Chemistry: Focus on NCERT for Inorganic & Physical basics. Physics: NCERT + strong problem-solving practice...",
       icon: "🏥",
-      gradient: "from-emerald-500 to-teal-600"
+      gradient: "from-emerald-500 to-teal-600",
     },
     {
       query: "How to become a data scientist",
-      response: "Master Python and libraries like NumPy, Pandas, Scikit-learn. Learn statistics and probability fundamentals. Practice on real datasets from Kaggle. Build projects showcasing ML models and data visualization...",
+      response:
+        "Master Python and libraries like NumPy, Pandas, Scikit-learn. Learn statistics and probability fundamentals. Practice on real datasets from Kaggle. Build projects showcasing ML models and data visualization...",
       icon: "📊",
-      gradient: "from-violet-500 to-purple-600"
+      gradient: "from-violet-500 to-purple-600",
     },
     {
       query: "Career path in graphic design",
-      response: "Learn Adobe Creative Suite (Photoshop, Illustrator, InDesign). Study design principles, color theory, and typography. Build a strong portfolio. Practice with real client projects and freelance work...",
+      response:
+        "Learn Adobe Creative Suite (Photoshop, Illustrator, InDesign). Study design principles, color theory, and typography. Build a strong portfolio. Practice with real client projects and freelance work...",
       icon: "🎨",
-      gradient: "from-pink-500 to-rose-600"
-    }
+      gradient: "from-pink-500 to-rose-600",
+    },
   ];
 
   const features = [
-    { icon: Target, text: "Personalized Roadmaps", gradient: "from-cyan-500 to-blue-600" },
-    { icon: Zap, text: "AI-Powered Insights", gradient: "from-violet-500 to-purple-600" },
-    { icon: Sparkles, text: "24/7 Support", gradient: "from-amber-500 to-orange-600" },
-    { icon: Users, text: "Community Support", gradient: "from-emerald-500 to-teal-600" },
+    {
+      icon: Target,
+      text: "Personalized Roadmaps",
+      gradient: "from-cyan-500 to-blue-600",
+    },
+    {
+      icon: Zap,
+      text: "AI-Powered Insights",
+      gradient: "from-violet-500 to-purple-600",
+    },
+    {
+      icon: Sparkles,
+      text: "24/7 Support",
+      gradient: "from-amber-500 to-orange-600",
+    },
+    {
+      icon: Users,
+      text: "Community Support",
+      gradient: "from-emerald-500 to-teal-600",
+    },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -112,7 +132,7 @@ export default function Landing() {
   const nextBlock = blocks[(currentIndex + 1) % blocks.length];
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-slate-950">
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-white dark:bg-slate-950">
       <AnimatedBackground />
       <Navbar />
 
@@ -126,7 +146,7 @@ export default function Landing() {
         >
           {/* Badge */}
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-sm text-white shadow-lg"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/70 dark:bg-white/10 backdrop-blur-xl border border-gray-200 dark:border-white/20 rounded-full text-sm text-gray-900 dark:text-white shadow-lg"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -148,7 +168,8 @@ export default function Landing() {
               }}
               transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               style={{
-                background: "linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899, #06b6d4)",
+                background:
+                  "linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899, #06b6d4)",
                 backgroundSize: "200% auto",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -160,7 +181,7 @@ export default function Landing() {
           </motion.div>
 
           <motion.h2
-            className="text-3xl md:text-5xl text-white font-bold leading-tight"
+            className="text-3xl md:text-5xl text-gray-900 dark:text-white font-bold leading-tight"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -173,7 +194,7 @@ export default function Landing() {
           </motion.h2>
 
           <motion.p
-            className="text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed"
+            className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-2xl leading-relaxed"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -203,7 +224,7 @@ export default function Landing() {
           </motion.button>
 
           <motion.p
-            className="text-sm text-gray-400"
+            className="text-sm text-gray-500 dark:text-gray-400"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
@@ -233,7 +254,9 @@ export default function Landing() {
                   whileHover={{ scale: 1.02 }}
                 >
                   <div className="bg-gradient-to-br from-violet-500 to-fuchsia-600 rounded-2xl p-4 shadow-2xl">
-                    <p className="text-white font-medium">{currentBlock.query}</p>
+                    <p className="text-white font-medium">
+                      {currentBlock.query}
+                    </p>
                   </div>
                 </motion.div>
 
@@ -245,13 +268,13 @@ export default function Landing() {
                   transition={{ delay: 0.4 }}
                   whileHover={{ scale: 1.02 }}
                 >
-                  <div className="relative bg-gradient-to-br from-white/[0.15] to-white/[0.05] backdrop-blur-2xl rounded-2xl p-6 shadow-2xl border border-white/20">
+                  <div className="relative bg-gradient-to-br from-white/80 to-gray-50 dark:from-white/[0.15] dark:to-white/[0.05] backdrop-blur-2xl rounded-2xl p-6 shadow-2xl border border-gray-200 dark:border-white/20">
                     <motion.div
                       className={`absolute -inset-1 bg-gradient-to-r ${currentBlock.gradient} opacity-20 blur-xl rounded-2xl`}
                       animate={{ opacity: [0.2, 0.4, 0.2] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     />
-                    
+
                     <div className="relative z-10">
                       <div className="flex items-center gap-3 mb-4">
                         <motion.div
@@ -262,12 +285,16 @@ export default function Landing() {
                           {currentBlock.icon}
                         </motion.div>
                         <div>
-                          <h4 className="text-white font-bold text-sm">PathForge AI</h4>
-                          <p className="text-gray-400 text-xs">Career Assistant</p>
+                          <h4 className="text-gray-900 dark:text-white font-bold text-sm">
+                            PathForge AI
+                          </h4>
+                          <p className="text-gray-500 dark:text-gray-400 text-xs">
+                            Career Assistant
+                          </p>
                         </div>
                       </div>
 
-                      <p className="text-gray-200 text-sm leading-relaxed">
+                      <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
                         {currentBlock.response}
                       </p>
 
@@ -315,7 +342,9 @@ export default function Landing() {
                 <motion.div
                   key={idx}
                   className={`h-2 rounded-full transition-all duration-300 ${
-                    idx === currentIndex ? "bg-violet-500 w-8" : "bg-white/30 w-2"
+                    idx === currentIndex
+                      ? "bg-violet-500 w-8"
+                      : "bg-gray-300 dark:bg-white/30 w-2"
                   }`}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -349,15 +378,17 @@ export default function Landing() {
                 key={idx}
                 className="group relative"
                 initial={{ opacity: 0, y: 50 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                animate={
+                  isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                }
                 transition={{ delay: 0.3 + idx * 0.1, duration: 0.6 }}
                 whileHover={{ y: -8, scale: 1.03 }}
               >
-                <div className="relative h-full bg-gradient-to-br from-white/[0.12] to-white/[0.05] backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-xl transition-all duration-300 group-hover:border-white/40 group-hover:shadow-2xl">
+                <div className="relative h-full bg-gradient-to-br from-white/80 to-indigo-50 dark:from-white/[0.12] dark:to-white/[0.05] backdrop-blur-xl rounded-2xl p-6 border border-gray-200 dark:border-white/20 shadow-xl transition-all duration-300 group-hover:border-indigo-300 dark:group-hover:border-white/40 group-hover:shadow-2xl">
                   <motion.div
                     className={`absolute -inset-1 bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-20 blur-xl rounded-2xl transition-opacity duration-500`}
                   />
-                  
+
                   <div className="relative z-10 flex flex-col items-center text-center gap-4">
                     <motion.div
                       className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center shadow-lg`}
@@ -366,12 +397,18 @@ export default function Landing() {
                     >
                       <feature.icon className="w-8 h-8 text-white" />
                     </motion.div>
-                    <h4 className="text-lg font-bold text-white">{feature.text}</h4>
-                    <p className="text-sm text-gray-300 leading-relaxed">
-                      {idx === 0 && "Get custom learning paths tailored to your career goals"}
-                      {idx === 1 && "Leverage AI to discover the best opportunities for you"}
-                      {idx === 2 && "Access guidance anytime, anywhere with our AI assistant"}
-                      {idx === 3 && "Connect with learners and mentors in your field"}
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-white">
+                      {feature.text}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                      {idx === 0 &&
+                        "Get custom learning paths tailored to your career goals"}
+                      {idx === 1 &&
+                        "Leverage AI to discover the best opportunities for you"}
+                      {idx === 2 &&
+                        "Access guidance anytime, anywhere with our AI assistant"}
+                      {idx === 3 &&
+                        "Connect with learners and mentors in your field"}
                     </p>
                   </div>
                 </div>
@@ -382,27 +419,47 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 py-6 bg-white/[0.03] backdrop-blur-xl border-t border-white/10 text-center">
-        <p className="text-gray-400 text-sm">
+      <footer className="relative z-10 py-6 bg-white/70 dark:bg-white/[0.03] backdrop-blur-xl border-t border-gray-200 dark:border-white/10 text-center">
+        <p className="text-gray-500 dark:text-gray-400 text-sm">
           © {new Date().getFullYear()} PathForge. All rights reserved.{" "}
-          <span className="text-violet-400">Built with passion for learners</span>
+          <span className="text-violet-500 dark:text-violet-400">
+            Built with passion for learners
+          </span>
         </p>
       </footer>
 
       <style jsx>{`
         @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
         }
         .animate-gradient-shift {
           background-size: 200% 200%;
           animation: gradient-shift 15s ease infinite;
         }
         .bg-grid-pattern {
-          background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+          background-image: linear-gradient(
+              rgba(0, 0, 0, 0.05) 1px,
+              transparent 1px
+            ),
+            linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
           background-size: 50px 50px;
+        }
+        :global(.dark) .bg-grid-pattern {
+          background-image: linear-gradient(
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            );
         }
       `}</style>
     </div>

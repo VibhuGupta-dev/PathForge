@@ -7,8 +7,8 @@ import axios from "axios";
 const AnimatedBackground = () => (
   <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     {/* Rich Gradient Background */}
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-900 to-rose-950 animate-gradient-shift"></div>
-    
+    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-rose-50 dark:from-indigo-950 dark:via-purple-900 dark:to-rose-950 animate-gradient-shift"></div>
+
     {/* Floating Orbs */}
     <motion.div
       className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-[120px]"
@@ -36,16 +36,23 @@ const AnimatedBackground = () => (
       }}
       transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
     />
-    
+
     {/* Mesh Grid */}
     <div className="absolute inset-0 bg-grid-pattern opacity-[0.08]"></div>
-    
+
     {/* Light Beams */}
     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent animate-pulse"></div>
   </div>
 );
 
-const FeatureCard = ({ icon: Icon, title, description, onClick, index, gradient }) => (
+const FeatureCard = ({
+  icon: Icon,
+  title,
+  description,
+  onClick,
+  index,
+  gradient,
+}) => (
   <motion.div
     className="relative group cursor-pointer"
     initial={{ opacity: 0, y: 50, rotateX: -15 }}
@@ -67,10 +74,12 @@ const FeatureCard = ({ icon: Icon, title, description, onClick, index, gradient 
         whileHover={{ x: "100%" }}
         transition={{ duration: 0.6 }}
       />
-      
+
       {/* Gradient Glow */}
-      <div className={`absolute -inset-1 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`}></div>
-      
+      <div
+        className={`absolute -inset-1 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`}
+      ></div>
+
       {/* Content */}
       <div className="relative z-10 p-8 flex flex-col items-center text-center h-full">
         {/* Icon Container */}
@@ -81,27 +90,30 @@ const FeatureCard = ({ icon: Icon, title, description, onClick, index, gradient 
         >
           <Icon className="w-10 h-10 text-white" strokeWidth={2} />
         </motion.div>
-        
+
         {/* Title */}
         <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">
           {title}
         </h3>
-        
+
         {/* Description */}
         <p className="text-gray-300 text-sm leading-relaxed mb-6 flex-grow">
           {description}
         </p>
-        
+
         {/* Button */}
         <motion.button
           className={`w-full px-6 py-3 rounded-xl bg-gradient-to-r ${gradient} text-white font-semibold shadow-lg transition-all duration-300`}
-          whileHover={{ scale: 1.05, boxShadow: "0 10px 40px rgba(139, 92, 246, 0.4)" }}
+          whileHover={{
+            scale: 1.05,
+            boxShadow: "0 10px 40px rgba(139, 92, 246, 0.4)",
+          }}
           whileTap={{ scale: 0.95 }}
         >
           Get Started
         </motion.button>
       </div>
-      
+
       {/* Sparkle Effect */}
       <motion.div
         className="absolute top-4 right-4 text-white/30"
@@ -125,28 +137,32 @@ export default function Features() {
     {
       icon: Users,
       title: "Community Post",
-      description: "Share your thoughts and connect with others in a supportive community.",
+      description:
+        "Share your thoughts and connect with others in a supportive community.",
       onClick: () => navigate("/community"),
       gradient: "from-cyan-500 via-blue-500 to-indigo-600",
     },
     {
       icon: Bot,
       title: "Roadmap Generator",
-      description: "Follow a personalized roadmap to achieve your career goals step-by-step.",
+      description:
+        "Follow a personalized roadmap to achieve your career goals step-by-step.",
       onClick: () => navigate("/dashboard"),
       gradient: "from-violet-500 via-purple-500 to-fuchsia-600",
     },
     {
       icon: Bot,
       title: "AI Chatbot 24/7",
-      description: "Get instant career assistance from our AI chatbot, anytime, anywhere.",
+      description:
+        "Get instant career assistance from our AI chatbot, anytime, anywhere.",
       onClick: () => navigate("/chatbot"),
       gradient: "from-amber-500 via-orange-500 to-rose-600",
     },
     {
       icon: Video,
       title: "30-Day Program",
-      description: "Follow a daily schedule with motivational videos to combat depression.",
+      description:
+        "Follow a daily schedule with motivational videos to combat depression.",
       onClick: () => navigate("/30days"),
       gradient: "from-emerald-500 via-teal-500 to-cyan-600",
     },
@@ -170,12 +186,12 @@ export default function Features() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white relative overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-white relative overflow-hidden">
       <AnimatedBackground />
 
       {/* Glass Header */}
       <motion.header
-        className="fixed top-0 left-0 right-0 z-50 bg-white/[0.08] backdrop-blur-2xl border-b border-white/10"
+        className="fixed top-0 left-0 right-0 z-50 bg-white/70 dark:bg-white/[0.08] backdrop-blur-2xl border-b border-gray-200 dark:border-white/10"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -275,14 +291,15 @@ export default function Features() {
         transition={{ delay: 1 }}
       >
         <p className="text-gray-400 text-sm">
-          Built with <span className="text-rose-400">❤️</span> for your growth journey{" "}
-          <span className="text-cyan-400">🚀</span>
+          Built with <span className="text-rose-400">❤️</span> for your growth
+          journey <span className="text-cyan-400">🚀</span>
         </p>
       </motion.footer>
 
       <style jsx>{`
         @keyframes gradient-shift {
-          0%, 100% {
+          0%,
+          100% {
             background-position: 0% 50%;
           }
           50% {
@@ -294,9 +311,15 @@ export default function Features() {
           animation: gradient-shift 15s ease infinite;
         }
         .bg-grid-pattern {
-          background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+          background-image: linear-gradient(
+              rgba(255, 255, 255, 0.05) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.05) 1px,
+              transparent 1px
+            );
           background-size: 50px 50px;
         }
       `}</style>

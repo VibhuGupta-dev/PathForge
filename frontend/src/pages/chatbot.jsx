@@ -1,22 +1,33 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, Menu, X, ArrowLeft, Sparkles, Mail, RefreshCw, LogOut, MessageSquare, Clock } from "lucide-react";
+import {
+  Send,
+  Menu,
+  X,
+  ArrowLeft,
+  Sparkles,
+  Mail,
+  RefreshCw,
+  LogOut,
+  MessageSquare,
+  Clock,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import FloatingButton from "../components/FloatingButton";
 import Skeleton from "react-loading-skeleton";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 
 const AnimatedBackground = () => (
   <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-900 to-rose-950 animate-gradient-shift"></div>
+    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-rose-50 dark:from-indigo-950 dark:via-purple-900 dark:to-rose-950 animate-gradient-shift"></div>
     <motion.div
-      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/15 to-blue-500/15 rounded-full blur-[140px]"
+      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-[140px]"
       animate={{ scale: [1, 1.2, 1], x: [0, 60, 0], y: [0, 40, 0] }}
       transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
     />
     <motion.div
-      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/15 to-fuchsia-500/15 rounded-full blur-[140px]"
+      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rounded-full blur-[140px]"
       animate={{ scale: [1, 1.3, 1], x: [0, -60, 0], y: [0, -40, 0] }}
       transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
     />
@@ -29,40 +40,61 @@ const AnimatedBackground = () => (
     {[...Array(25)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-1 h-1 bg-white/20 rounded-full"
-        style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
+        className="absolute w-1 h-1 bg-indigo-900/10 dark:bg-white/20 rounded-full"
+        style={{
+          left: `${Math.random() * 100}%`,
+          top: `${Math.random() * 100}%`,
+        }}
         animate={{ y: [0, -40, 0], opacity: [0.2, 0.7, 0.2] }}
-        transition={{ duration: 3 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 2 }}
+        transition={{
+          duration: 3 + Math.random() * 2,
+          repeat: Infinity,
+          delay: Math.random() * 2,
+        }}
       />
     ))}
   </div>
 );
 
 const StatusIndicator = ({ status }) => (
-  <motion.div 
-    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg" 
-    initial={{ opacity: 0, scale: 0.8 }} 
-    animate={{ opacity: 1, scale: 1 }} 
+  <motion.div
+    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-lg"
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{ opacity: 1, scale: 1 }}
     transition={{ duration: 0.5 }}
   >
     <motion.span
       className={`w-2.5 h-2.5 rounded-full ${
-        status === "online" ? "bg-emerald-400" : 
-        status === "offline" ? "bg-rose-400" : 
-        "bg-amber-400"
+        status === "online"
+          ? "bg-emerald-400"
+          : status === "offline"
+          ? "bg-rose-400"
+          : "bg-amber-400"
       } shadow-lg`}
-      animate={{ 
-        scale: status === "online" ? [1, 1.4, 1] : status === "checking" ? [1, 1.3, 1] : 1,
-        boxShadow: status === "online" ? [
-          "0 0 0 0 rgba(52, 211, 153, 0.7)",
-          "0 0 0 10px rgba(52, 211, 153, 0)",
-          "0 0 0 0 rgba(52, 211, 153, 0)"
-        ] : []
+      animate={{
+        scale:
+          status === "online"
+            ? [1, 1.4, 1]
+            : status === "checking"
+            ? [1, 1.3, 1]
+            : 1,
+        boxShadow:
+          status === "online"
+            ? [
+                "0 0 0 0 rgba(52, 211, 153, 0.7)",
+                "0 0 0 10px rgba(52, 211, 153, 0)",
+                "0 0 0 0 rgba(52, 211, 153, 0)",
+              ]
+            : [],
       }}
       transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
     />
     <span className="text-xs font-semibold text-white">
-      {status === "online" ? "Online" : status === "offline" ? "Offline" : "Checking..."}
+      {status === "online"
+        ? "Online"
+        : status === "offline"
+        ? "Offline"
+        : "Checking..."}
     </span>
   </motion.div>
 );
@@ -104,7 +136,10 @@ export default function ChatbotPage() {
 
   const checkBackendStatus = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/health`, { timeout: 5000 });
+      const response = await axios.get(
+        `${import.meta.env.VITE_AI_BACKEND_URL}/health`,
+        { timeout: 5000 }
+      );
       setBackendStatus(response.status === 200 ? "online" : "offline");
       return response.status === 200;
     } catch (err) {
@@ -116,7 +151,10 @@ export default function ChatbotPage() {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, { withCredentials: true });
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/me`,
+        { withCredentials: true }
+      );
       setUser(response.data.user);
     } catch (err) {
       console.error("User fetch error:", err.response?.data || err.message);
@@ -127,7 +165,10 @@ export default function ChatbotPage() {
   const fetchHistory = async () => {
     if (!user) return;
     try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/api/analyses?userId=${user.id}`, { withCredentials: true });
+      const response = await axios.get(
+        `${import.meta.env.VITE_AI_BACKEND_URL}/api/analyses?userId=${user.id}`,
+        { withCredentials: true }
+      );
       if (response.data.success) {
         setHistory(response.data.data);
       }
@@ -140,7 +181,12 @@ export default function ChatbotPage() {
     if (!user || backendStatus !== "online") return;
     setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_AI_BACKEND_URL}/api/ai-report?userId=${user.id}`, { withCredentials: true });
+      const response = await axios.get(
+        `${import.meta.env.VITE_AI_BACKEND_URL}/api/ai-report?userId=${
+          user.id
+        }`,
+        { withCredentials: true }
+      );
       const result = response.data;
       const botMessage = {
         sender: "AI",
@@ -168,7 +214,8 @@ export default function ChatbotPage() {
 
     try {
       const online = await checkBackendStatus();
-      if (!online) throw new Error("Server is offline. Please try again later.");
+      if (!online)
+        throw new Error("Server is offline. Please try again later.");
 
       const response = await axios.post(
         `${import.meta.env.VITE_AI_BACKEND_URL}/api/ai-chat`,
@@ -205,9 +252,9 @@ export default function ChatbotPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-white relative overflow-hidden">
+    <div className="flex min-h-screen bg-white dark:bg-slate-950 text-gray-900 dark:text-white relative overflow-hidden">
       <AnimatedBackground />
-      
+
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
@@ -247,7 +294,11 @@ export default function ChatbotPage() {
 
         <div className="flex-1 p-6 overflow-y-auto">
           {user && (
-            <motion.div className="mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.div
+              className="mb-8"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
               <div className="flex flex-col items-center gap-4 mb-6">
                 <motion.div
                   className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-cyan-500 via-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-3xl font-bold shadow-2xl"
@@ -263,7 +314,9 @@ export default function ChatbotPage() {
                   </motion.div>
                 </motion.div>
                 <div className="text-center w-full">
-                  <h3 className="text-xl font-bold text-white mb-1">{user.Fullname || "User"}</h3>
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    {user.Fullname || "User"}
+                  </h3>
                   <div className="flex items-center justify-center gap-2 text-gray-300 text-sm">
                     <Mail className="w-3.5 h-3.5" />
                     <p className="truncate max-w-[200px]">{user.email}</p>
@@ -289,7 +342,10 @@ export default function ChatbotPage() {
 
               <div className="space-y-3">
                 <motion.button
-                  onClick={() => { setMessages([]); setSidebarOpen(false); }}
+                  onClick={() => {
+                    setMessages([]);
+                    setSidebarOpen(false);
+                  }}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg"
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
@@ -318,7 +374,9 @@ export default function ChatbotPage() {
                     exit={{ opacity: 0, height: 0 }}
                   >
                     {history.length === 0 ? (
-                      <p className="text-gray-400 text-sm text-center py-4">No history available</p>
+                      <p className="text-gray-400 text-sm text-center py-4">
+                        No history available
+                      </p>
                     ) : (
                       history.map((item, i) => (
                         <motion.div
@@ -327,7 +385,11 @@ export default function ChatbotPage() {
                           onClick={() => {
                             setMessages([
                               { sender: "User", text: item.userInput.text },
-                              { sender: "AI", text: item.aiResponse.response, meta: item.aiResponse },
+                              {
+                                sender: "AI",
+                                text: item.aiResponse.response,
+                                meta: item.aiResponse,
+                              },
                             ]);
                             setSidebarOpen(false);
                           }}
@@ -367,7 +429,7 @@ export default function ChatbotPage() {
             Back to Features
           </motion.button>
           <motion.button
-            onClick={() => window.location.href = "/signin"}
+            onClick={() => (window.location.href = "/signin")}
             className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-xl font-semibold shadow-lg"
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
@@ -385,10 +447,20 @@ export default function ChatbotPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="flex items-center gap-2">
-            <motion.button onClick={() => navigate("/features")} className="p-2 hover:bg-white/10 rounded-xl" whileHover={{ scale: 1.1, x: -3 }} whileTap={{ scale: 0.95 }}>
+            <motion.button
+              onClick={() => navigate("/features")}
+              className="p-2 hover:bg-white/10 rounded-xl"
+              whileHover={{ scale: 1.1, x: -3 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <ArrowLeft size={24} />
             </motion.button>
-            <motion.button onClick={() => setSidebarOpen(true)} className="p-2 hover:bg-white/10 rounded-xl" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+            <motion.button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-white/10 rounded-xl"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <Menu size={24} />
             </motion.button>
           </div>
@@ -416,7 +488,11 @@ export default function ChatbotPage() {
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-3xl"
                     animate={{ x: ["-100%", "100%"] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      repeatDelay: 1,
+                    }}
                   />
                   <div className="relative z-10">
                     <motion.div
@@ -430,7 +506,8 @@ export default function ChatbotPage() {
                       Welcome to CareerMentor
                     </h2>
                     <p className="text-lg md:text-xl text-gray-300 mb-4 leading-relaxed">
-                      Ask about career paths, skills, or certifications to get personalized advice!
+                      Ask about career paths, skills, or certifications to get
+                      personalized advice!
                     </p>
                     <div className="mt-6">
                       <StatusIndicator status={backendStatus} />
@@ -446,7 +523,9 @@ export default function ChatbotPage() {
               {messages.map((msg, i) => (
                 <motion.div
                   key={i}
-                  className={`flex ${msg.sender === "User" ? "justify-end" : "justify-start"}`}
+                  className={`flex ${
+                    msg.sender === "User" ? "justify-end" : "justify-start"
+                  }`}
                   initial={{ opacity: 0, y: 20, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -457,7 +536,11 @@ export default function ChatbotPage() {
                         <motion.div
                           className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg"
                           animate={{ rotate: [0, 360] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
                         >
                           <MessageSquare className="w-5 h-5 text-white" />
                         </motion.div>
@@ -474,28 +557,47 @@ export default function ChatbotPage() {
                       {msg.meta && (
                         <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-xs space-y-1 mb-3">
                           <div className="grid grid-cols-3 gap-2 text-gray-300">
-                            <div><strong>Type:</strong> {msg.meta.type}</div>
-                            <div><strong>Confidence:</strong> {msg.meta.confidence}</div>
-                            <div><strong>Source:</strong> {msg.meta.source}</div>
+                            <div>
+                              <strong>Type:</strong> {msg.meta.type}
+                            </div>
+                            <div>
+                              <strong>Confidence:</strong> {msg.meta.confidence}
+                            </div>
+                            <div>
+                              <strong>Source:</strong> {msg.meta.source}
+                            </div>
                           </div>
                         </div>
                       )}
                       <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">
-                        <strong>Disclaimer:</strong> This is AI-generated advice. Always consult a career counselor for personalized guidance.
+                        <strong>Disclaimer:</strong> This is AI-generated
+                        advice. Always consult a career counselor for
+                        personalized guidance.
                       </div>
                     </div>
                   ) : (
                     <div className="max-w-md p-4 rounded-2xl shadow-lg bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white">
-                      <p className="text-sm md:text-base whitespace-pre-line">{msg.text}</p>
+                      <p className="text-sm md:text-base whitespace-pre-line">
+                        {msg.text}
+                      </p>
                     </div>
                   )}
                 </motion.div>
               ))}
             </AnimatePresence>
             {loading && (
-              <motion.div className="flex justify-start" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <motion.div
+                className="flex justify-start"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
                 <div className="w-full max-w-3xl bg-gradient-to-br from-white/[0.12] to-white/[0.05] backdrop-blur-xl p-6 rounded-2xl shadow-xl border border-white/20">
-                  <Skeleton count={3} height={20} baseColor="rgba(255,255,255,0.1)" highlightColor="rgba(255,255,255,0.2)" />
+                  <Skeleton
+                    count={3}
+                    height={20}
+                    baseColor="rgba(255,255,255,0.1)"
+                    highlightColor="rgba(255,255,255,0.2)"
+                  />
                 </div>
               </motion.div>
             )}
@@ -521,7 +623,10 @@ export default function ChatbotPage() {
                 style={{ minHeight: "48px", maxHeight: "120px" }}
                 onInput={(e) => {
                   e.target.style.height = "auto";
-                  e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+                  e.target.style.height = `${Math.min(
+                    e.target.scrollHeight,
+                    120
+                  )}px`;
                 }}
                 disabled={backendStatus === "offline" || !user}
               />
@@ -536,7 +641,11 @@ export default function ChatbotPage() {
                   <motion.div
                     className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                   />
                 ) : (
                   <Send className="w-5 h-5" />
@@ -552,26 +661,54 @@ export default function ChatbotPage() {
 
       <style jsx>{`
         @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
         }
         .animate-gradient-shift {
           background-size: 200% 200%;
           animation: gradient-shift 15s ease infinite;
         }
         .bg-grid-pattern {
-          background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+          background-image: linear-gradient(
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            );
           background-size: 50px 50px;
         }
-        textarea::-webkit-scrollbar { display: none; }
-        textarea { -ms-overflow-style: none; scrollbar-width: none; }
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 5px; }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #06b6d4, #8b5cf6); border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(to bottom, #0891b2, #7c3aed); }
-        .react-render-markup h1, .react-render-markup h2, .react-render-markup h3 {
+        textarea::-webkit-scrollbar {
+          display: none;
+        }
+        textarea {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        ::-webkit-scrollbar {
+          width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: linear-gradient(to bottom, #06b6d4, #8b5cf6);
+          border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(to bottom, #0891b2, #7c3aed);
+        }
+        .react-render-markup h1,
+        .react-render-markup h2,
+        .react-render-markup h3 {
           font-weight: 600;
           color: #f3f4f6;
           margin: 0.5rem 0;
@@ -580,7 +717,8 @@ export default function ChatbotPage() {
           margin: 0.5rem 0;
           color: #e5e7eb;
         }
-        .react-render-markup ul, .react-render-markup ol {
+        .react-render-markup ul,
+        .react-render-markup ol {
           margin: 0.5rem 0;
           padding-left: 1.5rem;
           color: #e5e7eb;
@@ -598,21 +736,32 @@ export default function ChatbotPage() {
           border-radius: 0.25rem;
           font-size: 0.9em;
         }
-        .markdown-content h1, .markdown-content h2, .markdown-content h3,
-        .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3,
+        .markdown-content h4,
+        .markdown-content h5,
+        .markdown-content h6 {
           font-weight: 600;
           color: #f3f4f6;
           margin: 0.75rem 0 0.5rem 0;
         }
-        .markdown-content h1 { font-size: 1.5em; }
-        .markdown-content h2 { font-size: 1.3em; }
-        .markdown-content h3 { font-size: 1.1em; }
+        .markdown-content h1 {
+          font-size: 1.5em;
+        }
+        .markdown-content h2 {
+          font-size: 1.3em;
+        }
+        .markdown-content h3 {
+          font-size: 1.1em;
+        }
         .markdown-content p {
           margin: 0.5rem 0;
           color: #e5e7eb;
           line-height: 1.6;
         }
-        .markdown-content ul, .markdown-content ol {
+        .markdown-content ul,
+        .markdown-content ol {
           margin: 0.5rem 0;
           padding-left: 1.5rem;
           color: #e5e7eb;
@@ -621,11 +770,13 @@ export default function ChatbotPage() {
           margin-bottom: 0.375rem;
           line-height: 1.6;
         }
-        .markdown-content strong, .markdown-content b {
+        .markdown-content strong,
+        .markdown-content b {
           color: #ffffff;
           font-weight: 600;
         }
-        .markdown-content em, .markdown-content i {
+        .markdown-content em,
+        .markdown-content i {
           color: #d1d5db;
           font-style: italic;
         }
@@ -635,7 +786,7 @@ export default function ChatbotPage() {
           border-radius: 0.25rem;
           font-size: 0.9em;
           color: #fbbf24;
-          font-family: 'Courier New', monospace;
+          font-family: "Courier New", monospace;
         }
         .markdown-content pre {
           background: rgba(0, 0, 0, 0.3);
@@ -673,7 +824,8 @@ export default function ChatbotPage() {
           border-collapse: collapse;
           margin: 0.75rem 0;
         }
-        .markdown-content th, .markdown-content td {
+        .markdown-content th,
+        .markdown-content td {
           border: 1px solid rgba(255, 255, 255, 0.2);
           padding: 0.5rem;
           text-align: left;

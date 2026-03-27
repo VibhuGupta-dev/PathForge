@@ -19,11 +19,11 @@ import {
 const AnimatedBackground = () => (
   <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
     {/* Rich Gradient Background */}
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-900 to-rose-950 animate-gradient-shift"></div>
-    
+    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-rose-50 dark:from-indigo-950 dark:via-purple-900 dark:to-rose-950 animate-gradient-shift"></div>
+
     {/* Floating Orbs */}
     <motion.div
-      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/15 to-blue-500/15 rounded-full blur-[140px]"
+      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-[140px]"
       animate={{
         scale: [1, 1.2, 1],
         x: [0, 60, 0],
@@ -32,7 +32,7 @@ const AnimatedBackground = () => (
       transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
     />
     <motion.div
-      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/15 to-fuchsia-500/15 rounded-full blur-[140px]"
+      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rounded-full blur-[140px]"
       animate={{
         scale: [1, 1.3, 1],
         x: [0, -60, 0],
@@ -48,15 +48,15 @@ const AnimatedBackground = () => (
       }}
       transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
     />
-    
+
     {/* Mesh Grid */}
     <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]"></div>
-    
+
     {/* Animated Particles */}
     {[...Array(20)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-1 h-1 bg-white/20 rounded-full"
+        className="absolute w-1 h-1 bg-indigo-900/10 dark:bg-white/20 rounded-full"
         style={{
           left: `${Math.random() * 100}%`,
           top: `${Math.random() * 100}%`,
@@ -75,7 +75,14 @@ const AnimatedBackground = () => (
   </div>
 );
 
-const MemberCard = ({ member, index, onDelete, currentUser, BACKEND_URL, token }) => {
+const MemberCard = ({
+  member,
+  index,
+  onDelete,
+  currentUser,
+  BACKEND_URL,
+  token,
+}) => {
   const getInitials = (name) =>
     name
       .split(" ")
@@ -103,7 +110,8 @@ const MemberCard = ({ member, index, onDelete, currentUser, BACKEND_URL, token }
     return gradients[name.charCodeAt(0) % gradients.length];
   };
 
-  const canDelete = currentUser?.email && 
+  const canDelete =
+    currentUser?.email &&
     member.email?.toLowerCase() === currentUser.email.toLowerCase();
 
   return (
@@ -120,7 +128,7 @@ const MemberCard = ({ member, index, onDelete, currentUser, BACKEND_URL, token }
       className="group relative"
     >
       {/* Card */}
-      <div className="relative h-full bg-gradient-to-br from-white/[0.12] to-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/20 overflow-hidden shadow-xl transition-all duration-500 group-hover:border-white/40 group-hover:shadow-[0_0_40px_rgba(139,92,246,0.2)]">
+      <div className="relative h-full bg-white/80 dark:bg-white/[0.12] backdrop-blur-xl rounded-2xl border border-gray-200 dark:border-white/20 overflow-hidden shadow-xl transition-all duration-500 group-hover:border-indigo-300 dark:group-hover:border-white/40 group-hover:shadow-[0_0_40px_rgba(139,92,246,0.2)]">
         {/* Shine Effect */}
         <motion.div
           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
@@ -128,10 +136,10 @@ const MemberCard = ({ member, index, onDelete, currentUser, BACKEND_URL, token }
           whileHover={{ x: "100%" }}
           transition={{ duration: 0.8 }}
         />
-        
+
         {/* Gradient Glow */}
         <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-violet-500/20 to-fuchsia-500/20 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500"></div>
-        
+
         {/* Content */}
         <div className="relative z-10 p-6">
           {/* Avatar & Info */}
@@ -155,23 +163,23 @@ const MemberCard = ({ member, index, onDelete, currentUser, BACKEND_URL, token }
               {/* Avatar Border Glow */}
               <div className="absolute inset-0 rounded-2xl border-2 border-white/20"></div>
             </motion.div>
-            
+
             <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-xl text-white mb-2 tracking-tight">
+              <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2 tracking-tight">
                 {member.name}
               </h3>
-              <div className="flex items-center gap-2 text-gray-300 text-sm mb-2">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300 text-sm mb-2">
                 <Mail className="w-3.5 h-3.5 flex-shrink-0" />
                 <p className="truncate">{member.email}</p>
               </div>
               {member.createdAt && (
-                <div className="flex items-center gap-1.5 text-gray-400 text-xs">
+                <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 text-xs">
                   <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>Joined {formatDate(member.createdAt)}</span>
                 </div>
               )}
             </div>
-            
+
             {/* Sparkle Icon */}
             <motion.div
               className="text-white/20 flex-shrink-0"
@@ -187,8 +195,8 @@ const MemberCard = ({ member, index, onDelete, currentUser, BACKEND_URL, token }
 
           {/* About Section */}
           {member.about && (
-            <div className="mb-5 p-4 bg-white/5 rounded-xl border border-white/10">
-              <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
+            <div className="mb-5 p-4 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/10">
+              <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-3">
                 {member.about}
               </p>
             </div>
@@ -255,7 +263,8 @@ export default function CommunityPage() {
   const [error, setError] = useState("");
   const observer = useRef();
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+  const BACKEND_URL =
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
   const currentUser = JSON.parse(localStorage.getItem("user"));
   const token = localStorage.getItem("token");
 
@@ -264,7 +273,8 @@ export default function CommunityPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete your profile?")) return;
+    if (!window.confirm("Are you sure you want to delete your profile?"))
+      return;
     try {
       const res = await fetch(`${BACKEND_URL}/api/community/${id}`, {
         method: "DELETE",
@@ -298,7 +308,9 @@ export default function CommunityPage() {
 
         const data = await response.json();
         if (!response.ok)
-          throw new Error(data.message || `HTTP error! status: ${response.status}`);
+          throw new Error(
+            data.message || `HTTP error! status: ${response.status}`
+          );
 
         if (data.success) {
           const newMembers = data.data || [];
@@ -343,13 +355,13 @@ export default function CommunityPage() {
   // Enhanced search with real-time filtering
   useEffect(() => {
     const searchLower = searchTerm.trim().toLowerCase();
-    
+
     if (searchLower) {
       const filtered = members.filter((member) => {
         const nameMatch = member.name?.toLowerCase().includes(searchLower);
         const emailMatch = member.email?.toLowerCase().includes(searchLower);
         const aboutMatch = member.about?.toLowerCase().includes(searchLower);
-        
+
         return nameMatch || emailMatch || aboutMatch;
       });
       setFilteredMembers(filtered);
@@ -389,7 +401,9 @@ export default function CommunityPage() {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
                   Community Hub
                 </h1>
-                <p className="text-gray-400 text-sm mt-0.5">Connect with amazing people</p>
+                <p className="text-gray-400 text-sm mt-0.5">
+                  Connect with amazing people
+                </p>
               </div>
             </motion.div>
 
@@ -443,7 +457,11 @@ export default function CommunityPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              Found <span className="text-violet-400 font-semibold">{filteredMembers.length}</span> {filteredMembers.length === 1 ? 'member' : 'members'}
+              Found{" "}
+              <span className="text-violet-400 font-semibold">
+                {filteredMembers.length}
+              </span>{" "}
+              {filteredMembers.length === 1 ? "member" : "members"}
             </motion.div>
           )}
         </div>
@@ -468,7 +486,11 @@ export default function CommunityPage() {
             {filteredMembers.map((member, index) => (
               <div
                 key={member._id}
-                ref={index === filteredMembers.length - 1 ? lastMemberElementRef : null}
+                ref={
+                  index === filteredMembers.length - 1
+                    ? lastMemberElementRef
+                    : null
+                }
               >
                 <MemberCard
                   member={member}
@@ -507,9 +529,13 @@ export default function CommunityPage() {
             transition={{ duration: 0.5 }}
           >
             <UserCircle className="w-20 h-20 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-400 mb-2">No members found</h3>
+            <h3 className="text-2xl font-bold text-gray-400 mb-2">
+              No members found
+            </h3>
             <p className="text-gray-500 mb-4">
-              {searchTerm ? `No results for "${searchTerm}"` : "Be the first to join!"}
+              {searchTerm
+                ? `No results for "${searchTerm}"`
+                : "Be the first to join!"}
             </p>
             {searchTerm && (
               <motion.button
@@ -554,17 +580,28 @@ export default function CommunityPage() {
 
       <style jsx>{`
         @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
         }
         .animate-gradient-shift {
           background-size: 200% 200%;
           animation: gradient-shift 15s ease infinite;
         }
         .bg-grid-pattern {
-          background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+          background-image: linear-gradient(
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            );
           background-size: 50px 50px;
         }
       `}</style>

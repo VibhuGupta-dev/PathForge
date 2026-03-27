@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   // Animation variants for logo
@@ -21,22 +22,22 @@ export default function Navbar() {
   // Animation variants for links
   const linkVariants = {
     hidden: { opacity: 0, y: -20 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { duration: 0.6, ease: "easeOut" } 
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
     },
-    hover: { 
-      scale: 1.05, 
-      rotateX: 5, 
-      rotateY: -5, 
-      transition: { type: "spring", stiffness: 200, damping: 10 } 
+    hover: {
+      scale: 1.05,
+      rotateX: 5,
+      rotateY: -5,
+      transition: { type: "spring", stiffness: 200, damping: 10 },
     },
   };
 
   return (
-    <motion.nav 
-      className="fixed top-0 w-full bg-gray-900/30 backdrop-blur-lg border-b border-gray-700 px-6 py-4 flex mb-10 justify-between items-center z-20"
+    <motion.nav
+      className="fixed top-0 w-full bg-white/70 dark:bg-gray-900/30 backdrop-blur-lg border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex mb-10 justify-between items-center z-20"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
@@ -71,8 +72,13 @@ export default function Navbar() {
       </motion.h1>
 
       {/* Right Side Links */}
-      <div className="flex gap-6">
-        <motion.div variants={linkVariants} initial="hidden" animate="visible" whileHover="hover">
+      <div className="flex gap-6 items-center">
+        <motion.div
+          variants={linkVariants}
+          initial="hidden"
+          animate="visible"
+          whileHover="hover"
+        >
           <Link
             to="/"
             className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm font-medium transition duration-300"
@@ -80,7 +86,12 @@ export default function Navbar() {
             Home
           </Link>
         </motion.div>
-        <motion.div variants={linkVariants} initial="hidden" animate="visible" whileHover="hover">
+        <motion.div
+          variants={linkVariants}
+          initial="hidden"
+          animate="visible"
+          whileHover="hover"
+        >
           <Link
             to="/SignIn"
             className="px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm font-medium transition duration-300"
@@ -88,6 +99,7 @@ export default function Navbar() {
             Sign In
           </Link>
         </motion.div>
+        <ThemeToggle />
       </div>
 
       {/* Inline CSS for Particle Animation */}

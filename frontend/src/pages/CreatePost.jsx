@@ -1,27 +1,28 @@
 // file: frontend/src/components/CreateCommunityMember.jsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { UserPlus, Linkedin, Github, Image, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserPlus, Linkedin, Github, Image, AlertCircle } from "lucide-react";
 
 export default function CreateCommunityMember() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
-    about: '',
-    linkedin: '',
-    github: '',
+    name: "",
+    about: "",
+    linkedin: "",
+    github: "",
   });
   const [file, setFile] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const BACKEND_URL = import.meta?.env?.VITE_BACKEND_URL || 'http://localhost:3000';
+  const BACKEND_URL =
+    import.meta?.env?.VITE_BACKEND_URL || "http://localhost:3000";
 
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -29,78 +30,78 @@ export default function CreateCommunityMember() {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
       if (!allowedTypes.includes(selectedFile.type)) {
-        setError('Please upload a valid image file (JPEG, PNG, or GIF)');
+        setError("Please upload a valid image file (JPEG, PNG, or GIF)");
         return;
       }
       if (selectedFile.size > 5 * 1024 * 1024) {
-        setError('Image file size should be less than 5MB');
+        setError("Image file size should be less than 5MB");
         return;
       }
       setFile(selectedFile);
-      setError('');
+      setError("");
     }
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     // Basic form validation
     if (!formData.name.trim()) {
-      setError('Name is required');
+      setError("Name is required");
       setLoading(false);
       return;
     }
     if (!formData.linkedin.trim()) {
-      setError('LinkedIn URL is required');
+      setError("LinkedIn URL is required");
       setLoading(false);
       return;
     }
-    if (!formData.linkedin.includes('linkedin.com')) {
-      setError('Please provide a valid LinkedIn URL');
+    if (!formData.linkedin.includes("linkedin.com")) {
+      setError("Please provide a valid LinkedIn URL");
       setLoading(false);
       return;
     }
-    if (formData.github && !formData.github.includes('github.com')) {
-      setError('Please provide a valid GitHub URL');
+    if (formData.github && !formData.github.includes("github.com")) {
+      setError("Please provide a valid GitHub URL");
       setLoading(false);
       return;
     }
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('about', formData.about);
-      formDataToSend.append('linkedin', formData.linkedin);
-      if (formData.github) formDataToSend.append('github', formData.github);
-      if (file) formDataToSend.append('profileimg', file);
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("about", formData.about);
+      formDataToSend.append("linkedin", formData.linkedin);
+      if (formData.github) formDataToSend.append("github", formData.github);
+      if (file) formDataToSend.append("profileimg", file);
 
       // Get JWT token from localStorage
-      const token = localStorage.getItem('token'); // replace with your storage method
+      const token = localStorage.getItem("token"); // replace with your storage method
 
       const response = await fetch(`${BACKEND_URL}/api/community`, {
-        method: 'POST',
+        method: "POST",
         body: formDataToSend,
         headers: {
-          Authorization: token ? `Bearer ${token}` : '',
+          Authorization: token ? `Bearer ${token}` : "",
         },
-        credentials: 'include', // only needed if backend uses cookies
+        credentials: "include", // only needed if backend uses cookies
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to create community member');
+        throw new Error(data.message || "Failed to create community member");
       }
 
       if (data.success) {
-        navigate('/community');
+        navigate("/community");
       } else {
-        throw new Error(data.message || 'Failed to create community member');
+        throw new Error(data.message || "Failed to create community member");
       }
     } catch (err) {
       setError(err.message);
@@ -110,12 +111,13 @@ export default function CreateCommunityMember() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4">
-      <div className="max-w-md w-full bg-white/80 backdrop-blur-sm rounded-xl p-8 border border-gray-200/50 shadow-lg">
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-950 dark:via-gray-900 dark:to-indigo-950 flex items-center justify-center py-12 px-4">
+      <div className="max-w-md w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-xl p-8 border border-gray-200/50 dark:border-gray-700 shadow-lg">
         <div className="flex items-center gap-3 mb-6">
-          <UserPlus className="w-8 h-8 text-indigo-600" />
-          <h2 className="text-2xl font-bold text-gray-900">Join Our Community</h2>
+          <UserPlus className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Join Our Community
+          </h2>
         </div>
 
         {error && (
@@ -128,7 +130,10 @@ export default function CreateCommunityMember() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               Full Name *
             </label>
             <input
@@ -137,7 +142,7 @@ export default function CreateCommunityMember() {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/70"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white/70 dark:bg-gray-800 dark:text-white"
               placeholder="Enter your full name"
               required
             />
@@ -145,7 +150,10 @@ export default function CreateCommunityMember() {
 
           {/* About */}
           <div>
-            <label htmlFor="about" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="about"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
               About (Optional)
             </label>
             <textarea
@@ -161,7 +169,10 @@ export default function CreateCommunityMember() {
 
           {/* LinkedIn */}
           <div>
-            <label htmlFor="linkedin" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="linkedin"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               LinkedIn Profile *
             </label>
             <div className="relative">
@@ -181,7 +192,10 @@ export default function CreateCommunityMember() {
 
           {/* GitHub */}
           <div>
-            <label htmlFor="github" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="github"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               GitHub Profile (Optional)
             </label>
             <div className="relative">
@@ -200,7 +214,10 @@ export default function CreateCommunityMember() {
 
           {/* Profile Image */}
           <div>
-            <label htmlFor="profileimg" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="profileimg"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Profile Image (Optional)
             </label>
             <div className="relative">
@@ -225,7 +242,9 @@ export default function CreateCommunityMember() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {loading ? (
               <>
@@ -243,7 +262,7 @@ export default function CreateCommunityMember() {
 
         <div className="mt-6 text-center">
           <button
-            onClick={() => navigate('/community')}
+            onClick={() => navigate("/community")}
             className="text-indigo-600 hover:text-indigo-800 font-medium text-sm"
           >
             Back to Community

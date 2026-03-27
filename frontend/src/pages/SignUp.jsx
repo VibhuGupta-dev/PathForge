@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { User, Mail, Lock, Eye, EyeOff, Phone, Sparkles, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Phone,
+  Sparkles,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -7,10 +17,10 @@ import Navbar from "../components/NavBar";
 
 const AnimatedBackground = () => (
   <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-900 to-rose-950 animate-gradient-shift"></div>
-    
+    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-rose-50 dark:from-indigo-950 dark:via-purple-900 dark:to-rose-950 animate-gradient-shift"></div>
+
     <motion.div
-      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/15 to-blue-500/15 rounded-full blur-[140px]"
+      className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-[140px]"
       animate={{
         scale: [1, 1.2, 1],
         x: [0, 60, 0],
@@ -19,7 +29,7 @@ const AnimatedBackground = () => (
       transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
     />
     <motion.div
-      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/15 to-fuchsia-500/15 rounded-full blur-[140px]"
+      className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rounded-full blur-[140px]"
       animate={{
         scale: [1, 1.3, 1],
         x: [0, -60, 0],
@@ -27,13 +37,13 @@ const AnimatedBackground = () => (
       }}
       transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
     />
-    
+
     <div className="absolute inset-0 bg-grid-pattern opacity-[0.06]"></div>
-    
+
     {[...Array(25)].map((_, i) => (
       <motion.div
         key={i}
-        className="absolute w-1 h-1 bg-white/20 rounded-full"
+        className="absolute w-1 h-1 bg-indigo-900/10 dark:bg-white/20 rounded-full"
         style={{
           left: `${Math.random() * 100}%`,
           top: `${Math.random() * 100}%`,
@@ -73,9 +83,11 @@ export default function SignUp() {
     if (!values.email.trim()) e.email = "Email is required";
     else if (!emailRegex.test(values.email)) e.email = "Enter a valid email";
     if (!values.password) e.password = "Password is required";
-    else if (values.password.length < 6) e.password = "Password must be at least 6 characters";
+    else if (values.password.length < 6)
+      e.password = "Password must be at least 6 characters";
     if (!values.confirm) e.confirm = "Confirm your password";
-    else if (values.confirm !== values.password) e.confirm = "Passwords do not match";
+    else if (values.confirm !== values.password)
+      e.confirm = "Passwords do not match";
     if (!values.contact) e.contact = "Contact number is required";
     return e;
   }
@@ -114,7 +126,9 @@ export default function SignUp() {
       }
     } catch (err) {
       console.error("Signup error:", err.response || err);
-      setErrors({ form: err.response?.data?.message || "Something went wrong" });
+      setErrors({
+        form: err.response?.data?.message || "Something went wrong",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -122,15 +136,17 @@ export default function SignUp() {
 
   const getPasswordStrength = (pwd) => {
     if (!pwd) return { strength: 0, label: "", color: "" };
-    if (pwd.length < 6) return { strength: 33, label: "Weak", color: "bg-rose-500" };
-    if (pwd.length < 10) return { strength: 66, label: "Medium", color: "bg-amber-500" };
+    if (pwd.length < 6)
+      return { strength: 33, label: "Weak", color: "bg-rose-500" };
+    if (pwd.length < 10)
+      return { strength: 66, label: "Medium", color: "bg-amber-500" };
     return { strength: 100, label: "Strong", color: "bg-emerald-500" };
   };
 
   const passwordStrength = getPasswordStrength(form.password);
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-slate-950">
+    <div className="min-h-screen flex flex-col relative overflow-hidden bg-white dark:bg-slate-950">
       <AnimatedBackground />
       <Navbar />
 
@@ -149,7 +165,7 @@ export default function SignUp() {
             transition={{ delay: 0.2 }}
           >
             <motion.div
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-sm text-white shadow-lg mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/70 dark:bg-white/10 backdrop-blur-xl border border-gray-200 dark:border-white/20 rounded-full text-sm text-gray-900 dark:text-white shadow-lg mb-6"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3 }}
@@ -165,7 +181,8 @@ export default function SignUp() {
               }}
               transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
               style={{
-                background: "linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899, #06b6d4)",
+                background:
+                  "linear-gradient(90deg, #06b6d4, #8b5cf6, #ec4899, #06b6d4)",
                 backgroundSize: "200% auto",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -174,14 +191,14 @@ export default function SignUp() {
             >
               Create Account
             </motion.h1>
-            <p className="text-gray-300 text-lg">
+            <p className="text-gray-600 dark:text-gray-300 text-lg">
               Start your personalized learning journey
             </p>
           </motion.div>
 
           {/* Form Card */}
           <motion.div
-            className="relative bg-gradient-to-br from-white/[0.12] to-white/[0.05] backdrop-blur-2xl rounded-2xl p-8 shadow-2xl border border-white/20"
+            className="relative bg-white/80 dark:bg-white/[0.05] backdrop-blur-2xl rounded-2xl p-8 shadow-2xl border border-gray-200 dark:border-white/20"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 }}
@@ -197,17 +214,17 @@ export default function SignUp() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Name Input */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-200 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Full Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
                     <input
                       name="name"
                       value={form.name}
                       onChange={handleChange}
                       placeholder="John Doe"
-                      className="w-full pl-12 pr-4 py-3 bg-white/10 text-white placeholder-gray-400 rounded-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-xl border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                     />
                   </div>
                   <AnimatePresence>
@@ -226,17 +243,17 @@ export default function SignUp() {
 
                 {/* Email Input */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-200 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
                     <input
                       name="email"
                       value={form.email}
                       onChange={handleChange}
                       placeholder="your.email@example.com"
-                      className="w-full pl-12 pr-4 py-3 bg-white/10 text-white placeholder-gray-400 rounded-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-xl border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                     />
                   </div>
                   <AnimatePresence>
@@ -255,17 +272,17 @@ export default function SignUp() {
 
                 {/* Contact Input */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-200 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Contact Number
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
                     <input
                       name="contact"
                       value={form.contact}
                       onChange={handleChange}
                       placeholder="+91 1234567890"
-                      className="w-full pl-12 pr-4 py-3 bg-white/10 text-white placeholder-gray-400 rounded-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-xl border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                     />
                   </div>
                   <AnimatePresence>
@@ -284,40 +301,50 @@ export default function SignUp() {
 
                 {/* Password Input */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-200 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
                     <input
                       name="password"
                       value={form.password}
                       onChange={handleChange}
                       placeholder="Enter your password"
                       type={showPwd ? "text" : "password"}
-                      className="w-full pl-12 pr-12 py-3 bg-white/10 text-white placeholder-gray-400 rounded-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
+                      className="w-full pl-12 pr-12 py-3 bg-gray-50 dark:bg-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-xl border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPwd((s) => !s)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
                     >
-                      {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPwd ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                   {form.password && (
                     <div className="mt-2">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-gray-400">Password Strength</span>
-                        <span className={`text-xs font-semibold ${
-                          passwordStrength.strength === 100 ? "text-emerald-400" :
-                          passwordStrength.strength === 66 ? "text-amber-400" :
-                          "text-rose-400"
-                        }`}>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Password Strength
+                        </span>
+                        <span
+                          className={`text-xs font-semibold ${
+                            passwordStrength.strength === 100
+                              ? "text-emerald-400"
+                              : passwordStrength.strength === 66
+                              ? "text-amber-400"
+                              : "text-rose-400"
+                          }`}
+                        >
                           {passwordStrength.label}
                         </span>
                       </div>
-                      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
                         <motion.div
                           className={`h-full ${passwordStrength.color}`}
                           initial={{ width: 0 }}
@@ -343,18 +370,18 @@ export default function SignUp() {
 
                 {/* Confirm Password Input */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-200 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                     Confirm Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-gray-400" />
                     <input
                       name="confirm"
                       value={form.confirm}
                       onChange={handleChange}
                       placeholder="Confirm your password"
                       type={showPwd ? "text" : "password"}
-                      className="w-full pl-12 pr-4 py-3 bg-white/10 text-white placeholder-gray-400 rounded-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
+                      className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-white/10 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-xl border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-300"
                     />
                     {form.confirm && form.confirm === form.password && (
                       <CheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-emerald-400" />
@@ -402,7 +429,11 @@ export default function SignUp() {
                       <motion.div
                         className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
                       />
                       <span>Creating Account...</span>
                     </>
@@ -458,17 +489,28 @@ export default function SignUp() {
 
       <style jsx>{`
         @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
         }
         .animate-gradient-shift {
           background-size: 200% 200%;
           animation: gradient-shift 15s ease infinite;
         }
         .bg-grid-pattern {
-          background-image: 
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+          background-image: linear-gradient(
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            ),
+            linear-gradient(
+              90deg,
+              rgba(255, 255, 255, 0.03) 1px,
+              transparent 1px
+            );
           background-size: 50px 50px;
         }
       `}</style>
